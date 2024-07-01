@@ -1,0 +1,91 @@
+{
+    // Ref: https://github.com/v-xchen-v/OmniIsaacGymEnvs-XC/blob/main/.vscode/launch.json
+    // Ref: https://github.com/v-xchen-v/Luca_Isaac-sim/blob/main/source/.vscode/launch.json
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: Cartpole",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "omniisaacgymenvs/scripts/rlgames_train.py",
+            "console": "integratedTerminal",
+            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
+            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "preLaunchTask": "setup_python_env",
+            "args": [
+                "task=Cartpole",
+                "num_envs=2"
+            ]
+        },
+        {
+            "name": "Python Debugger: Franka Follow Target Train",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "omniisaacgymenvs/scripts/rlgames_train.py",
+            "console": "integratedTerminal",
+            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
+            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "preLaunchTask": "setup_python_env",
+            "args": [
+                "task=FrankaFollowTarget",
+                "num_envs=640"
+            ]
+        },
+        {
+            "name": "Python Debugger: Franka Follow Target Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "omniisaacgymenvs/scripts/rlgames_train.py",
+            "console": "integratedTerminal",
+            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
+            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "preLaunchTask": "setup_python_env",
+            "args": [
+                "task=FrankaFollowTarget",
+                "num_envs=2",
+                "test=True",
+                "checkpoint=${env:HOME}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/FrankaFollowTarget/nn/last_FrankaFollowTarget_ep_1000_rew_-1266.7161.pth"
+            ]
+        },
+        {
+            "name": "Python Debugger: Realman Follow Target Train",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "omniisaacgymenvs/scripts/rlgames_train.py",
+            "console": "integratedTerminal",
+            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
+            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "preLaunchTask": "setup_python_env",
+            "args": [
+                "task=RealmanFollowTarget",
+                "num_envs=640"
+            ]
+        },
+        {
+            "name": "Python Debugger: Realman Follow Target Test",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "omniisaacgymenvs/scripts/rlgames_train.py",
+            "console": "integratedTerminal",
+            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
+            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "preLaunchTask": "setup_python_env",
+            "args": [
+                "task=RealmanFollowTarget",
+                "num_envs=2",
+                "test=True",
+                "checkpoint=${env:HOME}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/RealmanFollowTarget/nn/last_RealmanFollowTarget_ep_200_rew_-866.2367.pth"
+            ]
+        },
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        }
+    ]
+}
