@@ -12,8 +12,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
-            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=Cartpole",
@@ -26,8 +26,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
-            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=FrankaFollowTarget",
@@ -40,14 +40,14 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
-            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=FrankaFollowTarget",
                 "num_envs=2",
                 "test=True",
-                "checkpoint=${env:HOME}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/FrankaFollowTarget/nn/last_FrankaFollowTarget_ep_1000_rew_-1266.7161.pth"
+                "checkpoint=${userHome}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/FrankaFollowTarget/nn/last_FrankaFollowTarget_ep_1000_rew_-1266.7161.pth"
             ]
         },
         {
@@ -56,8 +56,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
-            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=RealmanFollowTarget",
@@ -70,14 +70,14 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/python3",
-            "envFile": "${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=RealmanFollowTarget",
                 "num_envs=2",
                 "test=True",
-                "checkpoint=${env:HOME}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/RealmanFollowTarget/nn/last_RealmanFollowTarget_ep_200_rew_-866.2367.pth"
+                "checkpoint=${userHome}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/RealmanFollowTarget/nn/last_RealmanFollowTarget_ep_200_rew_-866.2367.pth"
             ]
         },
         {
