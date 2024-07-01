@@ -53,6 +53,7 @@ def import_tasks():
     
     # custom tasks
     from omniisaacgymenvs.tasks.franka_followtarget import FrankaFollowTargetTask
+    from omniisaacgymenvs.tasks.realman_followtarget import RealmanFollowTargetTask
 
     # Mappings from strings to environments
     task_map = {
@@ -78,6 +79,7 @@ def import_tasks():
         "TargetFollowing": TargetFollowingTask,
         
         "FrankaFollowTarget": FrankaFollowTargetTask,
+        "RealmanFollowTarget": RealmanFollowTargetTask,
     }
 
     task_map_warp = {

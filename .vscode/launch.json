@@ -33,6 +33,7 @@
                 "task=FrankaFollowTarget",
                 "num_envs=640",
                 "headless=True", // disable visualization while training to process faster
+                "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/FrankaFollowTarget/nn/last_FrankaFollowTarget_ep_800_rew_-3082.2246.pth" // loading checkpoint and continue
             ]
         },
         {
@@ -48,7 +49,7 @@
                 "task=FrankaFollowTarget",
                 "num_envs=2",
                 "test=True",
-                "checkpoint=${userHome}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/FrankaFollowTarget/nn/last_FrankaFollowTarget_ep_1000_rew_-1266.7161.pth"
+                "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/FrankaFollowTarget/nn/last_FrankaFollowTarget_ep_800_rew_-3082.2246.pth"
             ]
         },
         {
