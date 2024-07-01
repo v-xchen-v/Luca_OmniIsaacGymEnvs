@@ -31,7 +31,8 @@
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=FrankaFollowTarget",
-                "num_envs=640"
+                "num_envs=640",
+                "headless=True", // disable visualization while training to process faster
             ]
         },
         {
