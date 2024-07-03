@@ -84,6 +84,7 @@ class RealmanFollowTargetTask(RLTask):
         # first create a single environment
         self.get_realman()
 
+        # use object to present the hand to simplify
         self.get_object()
 
         self.get_goal()

@@ -63,7 +63,8 @@
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=RealmanFollowTarget",
-                "num_envs=640"
+                "num_envs=640",
+                // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ]
         },
         {
@@ -79,7 +80,7 @@
                 "task=RealmanFollowTarget",
                 "num_envs=2",
                 "test=True",
-                "checkpoint=${userHome}/Documents/repos/OmniIsaacGymEnvs/omniisaacgymenvs/runs/RealmanFollowTarget/nn/last_RealmanFollowTarget_ep_200_rew_-866.2367.pth"
+                "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/RealmanFollowTarget/nn/last_RealmanFollowTarget_ep_200_rew_-856.16223.pth"
             ]
         },
         {
