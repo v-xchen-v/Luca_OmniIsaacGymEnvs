@@ -51,7 +51,7 @@ class InspireHandR(Robot):
         self._name = name
 
         if self._usd_path is None:
-            self._usd_path = "/home/yichao/Documents/repos/Luca_Data/Robots/InspireHand/L_inspire_mimic_fix.usd"
+            self._usd_path = "/home/yichao/Documents/repos/Luca_Data/Robots/InspireHand/L_inspire_mimic_fix_noflange.usd"
             # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Luca_Data/Robots/InspireHand/L_inspire_mimic.usd"
             
         self._position = torch.tensor([0.0, 0.0, 0.5]) if translation is None else translation

@@ -106,6 +106,8 @@ class InHandManipulationTask(RLTask):
         self.object_start_translation = self.hand_start_translation.clone()
         self.object_start_translation[1] += self.pose_dy
         self.object_start_translation[2] += self.pose_dz
+        if hasattr(self, "pose_dx"):
+            self.object_start_translation[0] += self.pose_dx
         self.object_start_orientation = torch.tensor([1.0, 0.0, 0.0, 0.0], device=self.device)
 
         self.goal_displacement_tensor = torch.tensor([-0.2, -0.06, 0.12], device=self.device)

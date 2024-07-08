@@ -33,7 +33,11 @@ class InspireHandRotateCubeTask(InHandManipulationTask):
         # 7 actions for 7 DOFs in arm, ignore the 2 DOFs in gripper for the following target task
         self._num_actions = 6
 
-        self._num_observations = 42
+        self.obs_type = self._task_cfg["env"]["observationType"]
+        if self.obs_type == "full_no_vel":
+            self._num_observations = 36
+        else:
+            self._num_observations = 42
         # 6: inspire hand joints position (action space)
         # 6: inspire hand joints velocity
         # 3: goal position
@@ -70,6 +74,8 @@ class InspireHandRotateCubeTask(InHandManipulationTask):
             raise Exception("Unknown type of observations!\nobservationType should be one of: [full_no_vel, full]")
         print("Obs type:", self.obs_type)
         
+        # bigger cube is easy to manipulate for inspire hand
+        # self.object_scale = torch.tensor([1.1, 1.1, 1.1])
         self.object_scale = torch.tensor([1.0, 1.0, 1.0])
         
         InHandManipulationTask.update_config(self)
@@ -104,10 +110,14 @@ class InspireHandRotateCubeTask(InHandManipulationTask):
     #     self.hand_start_orientation = torch.tensor([-1.0, 0.0, 0.0, 0.0], device=self.device)
     #     self.pose_dy, self.pose_dz = -0.39, 0.10
     def get_starting_positions(self):
-        self.hand_start_translation = torch.tensor([0.0, 0.0, 0.5], device=self.device)
+        self.hand_start_translation = torch.tensor([0.01, 0.01, 0.5], device=self.device)
         # self.hand_start_orientation = torch.tensor([0.257551, 0.283045, 0.683330, -0.621782], device=self.device)
+        # 90 degree rotation in Y
         self.hand_start_orientation = torch.tensor([0.7071, -0.7072, 0.0, 0.0], device=self.device)
-        self.pose_dy, self.pose_dz = 0.16, 0.06
+        # 75 degree rotation in Y
+        # self.hand_start_orientation = torch.tensor([0.7933, -0.6088, 0.0, 0.0], device=self.device)
+        self.pose_dy, self.pose_dz = 0.16, 0.05
+        self.pose_dx = -0.05
 
     #Ref: omniisaacgymenvs/tasks/franka_deformable.py
     def get_hand(self):
@@ -158,14 +168,34 @@ class InspireHandRotateCubeTask(InHandManipulationTask):
             # self.obs_buf[:, 26:30] = self.goal_rot
             # self.obs_buf[:, 30:34] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
             # self.obs_buf[:, 34:50] = self.actions
-            raise NotImplemented("full_no_vel not impl")
+            
+            self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
+                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
+            )
+            self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
+
+            self.obs_buf[:, 12:15] = self.object_pos
+            self.obs_buf[:, 15:19] = self.object_rot
+            self.obs_buf[:, 19:22] = self.goal_pos
+            self.obs_buf[:, 22:26] = self.goal_rot
+            self.obs_buf[:, 26:30] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
+
+            self.obs_buf[:, 30:36] = self.actions
+            # 6: inspire hand joints position (action space)
+            # 6: inspire hand joints velocity
+            # 3: object position
+            # 4: object rotation
+            # 3: goal position
+            # 4: goal rotation
+            # 4: goal relative rotation
+            # 6: previous action
         else:
             # 6: inspire hand joints position (action space)
             # 6: inspire hand joints velocity
             # 3: object position
             # 4: object rotation
-            # 3: ?
-            # 3: ?
+            # 3: scaled linear velocity
+            # 3: scaled angle velocity
             # 3: goal position
             # 4: goal rotation
             # 4: goal relative rotation
