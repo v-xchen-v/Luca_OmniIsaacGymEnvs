@@ -51,3 +51,16 @@ class InspireHandView(ArticulationView):
     def initialize(self, physics_sim_view):
         super().initialize(physics_sim_view)
         self._actuated_dof_indices = [i for i in range(self.num_dof)]
+
+        self.actuated_joint_names = [
+            "L_index_proximal_joint",
+            "L_middle_proximal_joint",
+            "L_pinky_proximal_joint",
+            "L_ring_proximal_joint",
+            "L_thumb_proximal_yaw_joint",
+            "L_thumb_proximal_pitch_joint",
+        ]
+        self._actuated_dof_indices = list()
+        for joint_name in self.actuated_joint_names:
+            self._actuated_dof_indices.append(self.get_dof_index(joint_name))
+        self._actuated_dof_indices.sort()
