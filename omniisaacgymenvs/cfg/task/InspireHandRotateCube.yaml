@@ -14,10 +14,23 @@ env:
   clipActions: 1.0
 
   useRelativeControl: False
-  dofSpeedScale: 20.0
-  actionsMovingAverage: 1.0
+  # dofSpeedScale: 20.0
+  # dofSpeedScale: 10.0
+  # dofSpeedScale: 5.0
+  dofSpeedScale: 2.0
+  # dofSpeedScale: 0.5
+  # actionsMovingAverage: 0.9
+  actionsMovingAverage: 0.5
+  # actionsMovingAverage: 0.3
+  # actionsMovingAverage: 1.0
+  # actionsMovingAverage: 0.5
+  # actionsMovingAverage: 0.25
+  # actionsMovingAverage: 0.20
   # controlFrequencyInv: 4 # 30 Hz
-  controlFrequencyInv: 2 # 60 Hz
+  # controlFrequencyInv: 2 # 60 Hz
+  # controlFrequencyInv: 6 # 20 Hz
+  controlFrequencyInv: 12 # 10 Hz
+  # controlFrequencyInv: 20 # 5 Hz
 
 
   startPositionNoise: 0.01
@@ -30,12 +43,12 @@ env:
 
   # reward -> dictionary
   distRewardScale: -10.0
-  rotRewardScale: 1.0
+  rotRewardScale: 10.0
   rotEps: 0.1
   actionPenaltyScale: -0.0002
   reachGoalBonus: 250
   fallDistance: 0.24
-  fallPenalty: 0.0
+  fallPenalty: -50.0
   velObsScale: 0.2
 
   objectType: "block"
@@ -59,6 +72,10 @@ sim:
   default_material:
     static_friction: 1.0
     dynamic_friction: 1.0
+    # static_friction: 2.0
+    # dynamic_friction: 2.0
+    # static_friction: 10.0
+    # dynamic_friction: 10.0
     restitution: 0.0
 
   physx:

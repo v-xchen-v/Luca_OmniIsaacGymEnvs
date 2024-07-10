@@ -74,9 +74,16 @@ class InspireHandRotateCubeTask(InHandManipulationTask):
             raise Exception("Unknown type of observations!\nobservationType should be one of: [full_no_vel, full]")
         print("Obs type:", self.obs_type)
         
-        # bigger cube is easy to manipulate for inspire hand
         # self.object_scale = torch.tensor([1.1, 1.1, 1.1])
-        self.object_scale = torch.tensor([1.0, 1.0, 1.0])
+        # self.object_scale = torch.tensor([1.0, 1.0, 1.0])
+        # smaller cube is easier to rotate for inspire hand
+        # self.object_scale = torch.tensor([0.9, 0.9, 0.9])
+        # self.object_scale = torch.tensor([0.85, 0.85, 0.85])
+        # smaller cube is easier to roll by gravity, bigger is easier to be pushed by hand links
+        # self.object_scale = torch.tensor([0.80, 0.80, 0.80])
+        # self.object_scale = torch.tensor([0.70, 0.70, 0.70])
+        # self.object_scale = torch.tensor([0.60, 0.60, 0.60])
+        self.object_scale = torch.tensor([0.50, 0.50, 0.50])
         
         InHandManipulationTask.update_config(self)
 
@@ -113,11 +120,30 @@ class InspireHandRotateCubeTask(InHandManipulationTask):
         self.hand_start_translation = torch.tensor([0.01, 0.01, 0.5], device=self.device)
         # self.hand_start_orientation = torch.tensor([0.257551, 0.283045, 0.683330, -0.621782], device=self.device)
         # 90 degree rotation in Y
-        self.hand_start_orientation = torch.tensor([0.7071, -0.7072, 0.0, 0.0], device=self.device)
+        # self.hand_start_orientation = torch.tensor([0.7071, -0.7072, 0.0, 0.0], device=self.device)
+        # 90 degree rotation in Y, 5 degree in X
+        # self.hand_start_orientation = torch.tensor([0.7064, -0.7065, 0.0309, 0.0308], device=self.device)
+        # 90 degree rotation in Y, 5 degree in X, and more 10 degree in Y
+        # self.hand_start_orientation = torch.tensor([0.6421, -0.7654, 0.028, 0.0334], device=self.device)
+        # # 90 degree rotation in Y, 5 degree in X, and more 20 degree in Y
+        # self.hand_start_orientation = torch.tensor([0.573, -0.8184, 0.025, 0.0357], device=self.device)
+        
+        #  # 90 degree rotation in Y, -5 degree in X, and more 20 degree in Y
+        # self.hand_start_orientation = torch.tensor([0.573, -0.8184, -0.025, 0.0357], device=self.device)
+        # 90 degree rotation in Y, -15 degree in X, and more 20 degree in Y
+        # self.hand_start_orientation = torch.tensor([0.5686, -0.8122, -0.0749, -0.107], device=self.device)
+        # 90 degree rotation in Y, -20 degree in X, and more 20 degree in Y
+        # self.hand_start_orientation = torch.tensor([0.5648, -0.8086, -0.0997, -0.1423], device=self.device)
+        
+        # 90 degree rotation in Y, -20 degree in X, and more 30 degree in Y
+        self.hand_start_orientation = torch.tensor([0.4924, -0.8529, -0.0869, -0.1504], device=self.device)
+        
+        # self.hand_start_orientation = torch.tensor([0.6532, -0.6533, 0.2706, 0.2705], device=self.device)
         # 75 degree rotation in Y
         # self.hand_start_orientation = torch.tensor([0.7933, -0.6088, 0.0, 0.0], device=self.device)
-        self.pose_dy, self.pose_dz = 0.16, 0.05
-        self.pose_dx = -0.05
+        self.pose_dy, self.pose_dz = 0.15, 0.01
+        # self.pose_dx = -0.05 # object scale 1.0
+        self.pose_dx = -0.01 # object scale 0.9, close to thumb for a little bit    
 
     #Ref: omniisaacgymenvs/tasks/franka_deformable.py
     def get_hand(self):
