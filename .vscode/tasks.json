@@ -8,7 +8,7 @@
             "label": "setup_python_env",
             "type": "shell",
             "linux": {
-                "command": "export CARB_APP_PATH=${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/kit && export ISAAC_PATH=${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0 && export EXP_PATH=${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/apps && source ${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/setup_python_env.sh && printenv >${env:HOME}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env"
+                "command": "export CARB_APP_PATH=${env:HOME}/.local/share/ov/pkg/isaac-sim-4.1.0/kit && export ISAAC_PATH=${env:HOME}/.local/share/ov/pkg/isaac-sim-4.1.0 && export EXP_PATH=${env:HOME}/.local/share/ov/pkg/isaac-sim-4.1.0/apps && source ${env:HOME}/.local/share/ov/pkg/isaac-sim-4.1.0/setup_python_env.sh && printenv >${env:HOME}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env"
             }
         }
     ]

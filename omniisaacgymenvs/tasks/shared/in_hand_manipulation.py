@@ -347,6 +347,15 @@ class InHandManipulationTask(RLTask):
                 self.hand_dof_lower_limits[self.actuated_dof_indices],
                 self.hand_dof_upper_limits[self.actuated_dof_indices],
             )
+            
+            if self.scene.object_exists("movable_inspire_R_view"):
+                # self.act_moving_averate is a single number
+                if self.act_moving_average is not None and not isinstance(self.act_moving_average, torch.Tensor):
+                    self.act_moving_average = np.array([self.act_moving_average] * self.num_actions)
+                    movable_rot_scale = 0.01
+                    self.act_moving_average[3:6]  = self.act_moving_average[3:6] * movable_rot_scale
+                    self.act_moving_average = torch.from_numpy(self.act_moving_average).to(self.device, dtype=torch.float)
+            
             self.cur_targets[:, self.actuated_dof_indices] = (
                 self.act_moving_average * self.cur_targets[:, self.actuated_dof_indices]
                 + (1.0 - self.act_moving_average) * self.prev_targets[:, self.actuated_dof_indices]
@@ -359,9 +368,18 @@ class InHandManipulationTask(RLTask):
 
         self.prev_targets[:, self.actuated_dof_indices] = self.cur_targets[:, self.actuated_dof_indices]
 
-        self._hands.set_joint_position_targets(
-            self.cur_targets[:, self.actuated_dof_indices], indices=None, joint_indices=self.actuated_dof_indices
-        )
+        
+        if self.scene.object_exists("movable_inspire_R_view"):
+            next_pose = self.cur_targets[:, self.actuated_dof_indices]
+            movable_xyz_scale = 0
+            next_pose[:, :3] = next_pose[:, :3]*movable_xyz_scale
+            self._hands.set_joint_position_targets(
+                next_pose, indices=None, joint_indices=self.actuated_dof_indices
+            )
+        else:
+            self._hands.set_joint_position_targets(
+                self.cur_targets[:, self.actuated_dof_indices], indices=None, joint_indices=self.actuated_dof_indices
+            )
 
         if self._dr_randomizer.randomize:
             rand_envs = torch.where(

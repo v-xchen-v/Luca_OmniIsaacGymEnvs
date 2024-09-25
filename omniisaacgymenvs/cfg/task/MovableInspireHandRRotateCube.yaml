@@ -20,12 +20,13 @@ env:
   dofSpeedScale: 2.0
   # dofSpeedScale: 0.5
   # actionsMovingAverage: 0.9
-  actionsMovingAverage: 0.5
+  # actionsMovingAverage: 0.5
   # actionsMovingAverage: 0.3
   # actionsMovingAverage: 1.0
   # actionsMovingAverage: 0.5
   # actionsMovingAverage: 0.25
   # actionsMovingAverage: 0.20
+  actionsMovingAverage: 0.25
   # controlFrequencyInv: 4 # 30 Hz
   # controlFrequencyInv: 2 # 60 Hz
   # controlFrequencyInv: 6 # 20 Hz
@@ -52,7 +53,7 @@ env:
   velObsScale: 0.2
 
   objectType: "block"
-  observationType: "full_no_vel" # can be "full_no_vel", "full"
+  observationType: "full" # can be "full_no_vel", "full"
   successTolerance: 0.1
   printNumSuccesses: False
   maxConsecutiveSuccesses: 0

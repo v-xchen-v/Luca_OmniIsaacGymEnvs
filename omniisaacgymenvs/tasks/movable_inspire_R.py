@@ -31,13 +31,13 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         
         # settings in scripts
         # 7 actions for 7 DOFs in arm, ignore the 2 DOFs in gripper for the following target task
-        self._num_actions = 6
+        self._num_actions = 12
 
         self.obs_type = self._task_cfg["env"]["observationType"]
         if self.obs_type == "full_no_vel":
-            self._num_observations = 30 #42
+            self._num_observations = 42 # 42 # 30
         else:
-            self._num_observations = 42 #54
+            self._num_observations = 54 # 42
         # 12: inspire hand joints position (action space)
         # 12: inspire hand joints velocity
         # 3: object position
@@ -80,12 +80,12 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         # self.object_scale = torch.tensor([1.0, 1.0, 1.0])
         # smaller cube is easier to rotate for inspire hand
         # self.object_scale = torch.tensor([0.9, 0.9, 0.9])
-        # self.object_scale = torch.tensor([0.85, 0.85, 0.85])
+        self.object_scale = torch.tensor([0.85, 0.85, 0.85])
         # smaller cube is easier to roll by gravity, bigger is easier to be pushed by hand links
         # self.object_scale = torch.tensor([0.80, 0.80, 0.80])
         # self.object_scale = torch.tensor([0.70, 0.70, 0.70])
         # self.object_scale = torch.tensor([0.60, 0.60, 0.60])
-        self.object_scale = torch.tensor([0.50, 0.50, 0.50])
+        # self.object_scale = torch.tensor([0.50, 0.50, 0.50])
         
         InHandManipulationTask.update_config(self)
 
@@ -172,7 +172,8 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         self.get_object_goal_observations()
 
         self.hand_dof_pos = self._hands.get_joint_positions(clone=False)
-        print(f'hand dof pos: {self.hand_dof_pos}')
+        # should not be nan, if nan, check the robot model
+        # print(f'hand dof pos: {self.hand_dof_pos}')
         self.hand_dof_vel = self._hands.get_joint_velocities(clone=False)
 
         if self.obs_type == "full_no_vel":
@@ -198,21 +199,41 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
             # self.obs_buf[:, 30:34] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
             # self.obs_buf[:, 34:50] = self.actions
             
-            self.obs_buf = torch.zeros(
-                (self._num_envs, self._num_observations), device=self.device, dtype=torch.float)
+            # dummy observation
+            # self.obs_buf = torch.zeros(
+            #     (self._num_envs, self._num_observations), device=self.device, dtype=torch.float)
                     
+            self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
+                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
+            )
+            # self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
+            
+            self.obs_buf[:, 12:15] = self.object_pos
+            self.obs_buf[:, 15:19] = self.object_rot
+            self.obs_buf[:, 19:22] = self.goal_pos
+            self.obs_buf[:, 22:26] = self.goal_rot
+            self.obs_buf[:, 26:30] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
+            self.obs_buf[:, 30:42] = self.actions
+            # 12: movable inspire hand joints position (action space)
+            # 12: movable inspire hand joints velocity
+            # 3: object position
+            # 4: object rotation
+            # 3: goal position
+            # 4: goal rotation
+            # 4: goal relative rotation
+            # 12: previous action
+            
             # self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
             #     self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
             # )
             # # self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
             
-            # self.obs_buf[:, 12:15] = self.object_pos
-            # self.obs_buf[:, 15:19] = self.object_rot
-            # self.obs_buf[:, 19:22] = self.goal_pos
-            # self.obs_buf[:, 22:26] = self.goal_rot
-            # self.obs_buf[:, 26:30] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
-
-            # self.obs_buf[:, 30:42] = self.actions
+            # self.obs_buf[:, 9:12] = self.object_pos
+            # self.obs_buf[:, 12:16] = self.object_rot
+            # self.obs_buf[:, 16:19] = self.goal_pos
+            # self.obs_buf[:, 19:23] = self.goal_rot
+            # self.obs_buf[:, 23:27] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
+            # self.obs_buf[:, 27:36] = self.actions
             # 12: movable inspire hand joints position (action space)
             # 12: movable inspire hand joints velocity
             # 3: object position
@@ -248,4 +269,15 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
             # self.obs_buf[:, 32:36] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
 
             # self.obs_buf[:, 36:42] = self.actions
-            raise NotImplementedError("Not implemented yet!")
+            
+            self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
+                self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
+            )
+            self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel
+            
+            self.obs_buf[:, 24:27] = self.object_pos
+            self.obs_buf[:, 27:31] = self.object_rot
+            self.obs_buf[:, 31:34] = self.goal_pos
+            self.obs_buf[:, 34:38] = self.goal_rot
+            self.obs_buf[:, 38:42] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
+            self.obs_buf[:, 42:54] = self.actions

@@ -53,12 +53,12 @@ class MovableInspireRView(ArticulationView):
         self._actuated_dof_indices = [i for i in range(self.num_dof)]
 
         self.actuated_joint_names = [
-            # "move_x",
-            # "move_y",
-            # "move_z",
-            # "rot_r",
-            # "rot_p",
-            # "rot_y",
+            "move_x",
+            "move_y",
+            "move_z",
+            "rot_r",
+            "rot_p",
+            "rot_y",
             "R_index_proximal_joint",
             "R_middle_proximal_joint",
             "R_pinky_proximal_joint",
