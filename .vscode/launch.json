@@ -12,8 +12,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=Cartpole",
@@ -26,8 +26,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=FrankaFollowTarget",
@@ -44,8 +44,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=FrankaFollowTarget",
@@ -60,8 +60,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=RealmanFollowTarget",
@@ -75,8 +75,8 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=RealmanFollowTarget",
@@ -86,19 +86,36 @@
             ]
         },
         {
-            // sim4_python scripts/rlgames_train.py task=InspireHandRotateCube num_envs=160 checkpoint=/home/yichao/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth
+            // sim4_python scripts/rlgames_train.py task=InspireHandRotateCube num_envs=160 checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth
             "name": "Python Debugger: InspireHand Rotate Cube in Hand Train",
             "type": "debugpy",
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=InspireHandRotateCube",
                 "num_envs=160",
-                // "checkpoint=/home/yichao/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
+                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
+                // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
+            ]
+        },
+        {
+            // sim4_python scripts/rlgames_train.py task=InspireHandRotateCube num_envs=160 checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth
+            "name": "Python Debugger: Movable InspireHand Rotate Cube in Hand Train",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "omniisaacgymenvs/scripts/rlgames_train.py",
+            "console": "integratedTerminal",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
+            "preLaunchTask": "setup_python_env",
+            "args": [
+                "task=MovableInspireHandRRotateCube",
+                "num_envs=2",
+                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
                 // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ]
         },
@@ -108,31 +125,31 @@
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=InspireHandRotateCube",
                 "num_envs=16",
                 "test=True",
-                "checkpoint=/home/yichao/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/last_InspireHandRotateCube_ep_200_rew_1304.6115.pth"
+                "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/last_InspireHandRotateCube_ep_1800_rew_1889.3878.pth"
                 // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ]
         },
         {
-            // sim4_python scripts/rlgames_train.py task=InspireHandRotateCube num_envs=160 checkpoint=/home/yichao/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth
+            // sim4_python scripts/rlgames_train.py task=InspireHandRotateCube num_envs=160 checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth
             "name": "Python Debugger: Allegro Rotate Cube in Hand Train",
             "type": "debugpy",
             "request": "launch",
             "program": "omniisaacgymenvs/scripts/rlgames_train.py",
             "console": "integratedTerminal",
-            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/kit/python/bin/python3",
-            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.0.0/.vscode/.standalone_examples.env",
+            "python": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/kit/python/bin/python3",
+            "envFile": "${userHome}/.local/share/ov/pkg/isaac-sim-4.1.0/.vscode/.standalone_examples.env",
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=AllegroHand",
                 "num_envs=2",
-                // "checkpoint=/home/yichao/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
+                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
                 // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ]
         },
