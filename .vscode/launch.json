@@ -114,7 +114,7 @@
             "preLaunchTask": "setup_python_env",
             "args": [
                 "task=MovableInspireHandRRotateCube",
-                "num_envs=160",
+                "num_envs=16",
                 // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
                 // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ]

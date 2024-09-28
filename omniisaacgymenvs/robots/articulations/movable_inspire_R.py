@@ -49,13 +49,15 @@ class MovableInspireHandR(Robot):
     ) -> None:
         self._usd_path = usd_path
         self._name = name
-
         if self._usd_path is None:
             # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Robots/InspireHand/L_inspire_mimic_noflange.usd"
             # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Luca_Data/Robots/InspireHand/L_inspire_mimic.usd"
             # replace it to your own path
-            self._usd_path = "/home/yichao/Documents/repos/Luca_Data/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
-            
+            # self._usd_path = "/home/wenbo/Documents/repos/Luca_Data/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
+            # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
+            # self._usd_path = "/home/wenbo/Documents/repos/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
+            # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
+            self._usd_path = "/home/wenbo/R_inspire_constrained.usd"
         self._position = torch.tensor([0.0, 0.0, 0.5]) if translation is None else translation
         self._orientation = (
             torch.tensor([0.257551, 0.283045, 0.683330, -0.621782]) if orientation is None else orientation

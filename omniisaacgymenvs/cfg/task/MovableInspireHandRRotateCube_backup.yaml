@@ -7,8 +7,8 @@ physics_engine: ${..physics_engine}
 # if given, will override the device setting in gym.
 env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
-  envSpacing: 1.5
-  episodeLength: 200
+  envSpacing: 0.75
+  episodeLength: 600
 
   clipObservations: 5.0
   clipActions: 1.0
@@ -48,8 +48,7 @@ env:
   rotEps: 0.1
   actionPenaltyScale: -0.0002
   reachGoalBonus: 250
-  # fallDistance: 0.24
-  fallDistance: 1
+  fallDistance: 0.24
   fallPenalty: -50.0
   velObsScale: 0.2
 
@@ -105,8 +104,7 @@ sim:
   inspire_hand:
     # -1 to use default values
     override_usd_defaults: False
-    # enable_self_collisions: True
-    enable_self_collisions: False
+    enable_self_collisions: True
     enable_gyroscopic_forces: False
     # also in stage params
     # per-actor
@@ -146,19 +144,4 @@ sim:
     stabilization_threshold: 0.0025
     # per-body
     density: -1
-    max_depenetration_velocity: 1000.0
-  table:
-    # -1 to use default values
-    override_usd_defaults: False
-    make_kinematic: True
-    enable_self_collisions: False
-    enable_gyroscopic_forces: True
-    # also in stage params
-    # per-actor
-    solver_position_iteration_count: 8
-    solver_velocity_iteration_count: 0
-    sleep_threshold: 0.005
-    stabilization_threshold: 0.0025
-    # per-body
-    density: 400.0
     max_depenetration_velocity: 1000.0
