@@ -47,10 +47,12 @@ env:
   rotRewardScale: 10.0
   rotEps: 0.1
   actionPenaltyScale: -0.0002
-  reachGoalBonus: 250
+  # reachGoalBonus: 250
+  reachGoalBonus: 25
   # fallDistance: 0.24
   fallDistance: 1
-  fallPenalty: -50.0
+  # fallPenalty: -50.0
+  fallPenalty: -5.0
   velObsScale: 0.2
 
   objectType: "block"
@@ -105,8 +107,8 @@ sim:
   inspire_hand:
     # -1 to use default values
     override_usd_defaults: False
-    # enable_self_collisions: True
-    enable_self_collisions: False
+    enable_self_collisions: True
+    # enable_self_collisions: False
     enable_gyroscopic_forces: False
     # also in stage params
     # per-actor

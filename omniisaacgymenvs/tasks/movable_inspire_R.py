@@ -32,11 +32,13 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         # settings in scripts
         # 7 actions for 7 DOFs in arm, ignore the 2 DOFs in gripper for the following target task
         self._num_actions = 12
+        # self._num_actions = 1
 
         self.obs_type = self._task_cfg["env"]["observationType"]
         if self.obs_type == "full_no_vel":
             self._num_observations = 42 # 42 # 30
         else:
+            # self._num_observations = 54 # 42
             self._num_observations = 54 # 42
         # 12: inspire hand joints position (action space)
         # 12: inspire hand joints velocity
@@ -153,7 +155,7 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
     def get_starting_positions(self):
         # self.hand_start_translation = torch.tensor([0.01, 0.01, 0.5], device=self.device)
         # self.hand_start_translation = torch.tensor([0.01, 0.01, 0.85], device=self.device) # using table
-        self.hand_start_translation = torch.tensor([0.01, 0.01, 0.15], device=self.device) # object falls on the ground
+        self.hand_start_translation = torch.tensor([0.01, 0.01, 0.2], device=self.device) # object falls on the ground
         # self.hand_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
         self.hand_start_orientation = torch.tensor([0.7071, 0., -0.7071, 0.], device=self.device)
         # self.hand_start_orientation = torch.tensor([0.7071, 0., 0.7071, 0.], device=self.device)
@@ -252,8 +254,10 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         # self.object_points = batch_quat_apply(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
         # self.object_points = batch_quat_apply(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
         # self.object_points = batch_quat_apply_wxyz(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
-        self.object_points = batch_quat_apply_wxyz(new_object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
-        
+        self.object_points = batch_quat_apply_wxyz(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
+        self.object_points_vis = self.object_points + self._env_pos.unsqueeze(1) # use for rendering
+        indices = torch.randperm(1024)[:256]
+        self.object_points_vis = self.object_points_vis[:,indices,:]
         # self.object_handle_pos = self.object_pos # not used 
         # self.object_back_pos = self.object_pos + quat_apply(self.object_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * 0.04) # not used
         self.object_linvel # have
@@ -278,7 +282,7 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         
         self.hand_obj_dist = torch.norm(self.right_hand_pos -  self.object_pos,dim=1)
         self.hand_obj_dist_xy = torch.norm(self.right_hand_palm_pos[:,:2] -  self.object_pos[:,:2],dim=1) # pipeline debug
-        
+        self.hand_goal_dist = torch.norm(self.right_hand_palm_pos - self.goal_pos, dim=1)
 
         # print(self.right_hand_pos -  self.object_pos)
         # print(self.hand_obj_dist)
@@ -319,11 +323,14 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         self.right_hand_th_pos = self.right_hand_th_pos + quat_apply_wxyz(self.right_hand_th_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * -0.005)
         # self.right_hand_th_pos = self.right_hand_th_pos + quat_apply(self.right_hand_th_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)   
         
-        # points = torch.concat([self.right_hand_pos, self.right_hand_palm_pos, 
-        #                        self.right_hand_ff_pos,self.right_hand_mf_pos,
-        #                        self.right_hand_rf_pos, self.right_hand_lf_pos, 
-        #                        self.right_hand_th_pos],dim=0)
-        # # points = self.object_points[0]
+        # hand_points = torch.concat([self.right_hand_pos.unsqueeze(1), self.right_hand_palm_pos.unsqueeze(1), 
+        #                        self.right_hand_ff_pos.unsqueeze(1), self.right_hand_mf_pos.unsqueeze(1),
+        #                        self.right_hand_rf_pos.unsqueeze(1), self.right_hand_lf_pos.unsqueeze(1), 
+        #                        self.right_hand_th_pos.unsqueeze(1)],dim=1)
+        # hand_points += self._env_pos.unsqueeze(1)
+        # hand_points = hand_points.view(-1,3)
+        # object_points = self.object_points_vis.reshape(-1,3)
+        # points = torch.concat([hand_points, object_points],dim=0)
         # points = points.detach().cpu().double().numpy()
         # self.point_cloud_prim.GetPointsAttr().Set([Gf.Vec3f(*point) for point in points])
         # self.point_cloud_prim.GetWidthsAttr().Set([0.02] * len(points))  # Example size
@@ -371,7 +378,7 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         # self.object_points = torch.randn([self.num_envs,1024,3],device=self.device)/400
         # self.object_points *= self.object_pos.unsqueeze(1)
         #         # Distance from hand pos to object point clouds
-        self.right_hand_pc_dist = batch_sided_distance(self.right_hand_pos.unsqueeze(1), self.object_points).squeeze(-1)        
+        self.right_hand_pc_dist = batch_sided_distance(self.right_hand_palm_pos.unsqueeze(1), self.object_points).squeeze(-1)     
         self.right_hand_pc_dist = torch.where(self.right_hand_pc_dist >= 0.5, 0.5 + 0 * self.right_hand_pc_dist, self.right_hand_pc_dist)
         # # Distance from hand finger pos to object point clouds
         # self.right_hand_finger_pos = torch.stack([self.right_hand_ff_pos, self.right_hand_mf_pos, self.right_hand_rf_pos, self.right_hand_lf_pos, self.right_hand_th_pos], dim=1)
@@ -442,9 +449,11 @@ class MovableInspireHandRRotateCubeTask(InHandManipulationTask):
         # self.obs_buf[:, 38:42] = quat_mul(self.object_rot, quat_conjugate(self.goal_rot))
         # self.obs_buf[:, 42:54] = self.actions
 
-        self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
-            self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
-        )
+        # self.obs_buf[:, 0 : self.num_hand_dofs] = unscale(
+        #     self.hand_dof_pos, self.hand_dof_lower_limits, self.hand_dof_upper_limits
+        # )
+        self.obs_buf[:, 0 : self.num_hand_dofs] =  self.hand_dof_pos
+        
         # 18 - 36
         self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel 
         self.obs_buf[:, 36:39] = self.object_pos
