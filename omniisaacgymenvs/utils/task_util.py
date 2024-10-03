@@ -56,6 +56,8 @@ def import_tasks():
     from omniisaacgymenvs.tasks.realman_followtarget import RealmanFollowTargetTask
     from omniisaacgymenvs.tasks.inspire_hand import InspireHandRotateCubeTask
     from omniisaacgymenvs.tasks.movable_inspire_R import MovableInspireHandRRotateCubeTask
+    from omniisaacgymenvs.tasks.floating_object import FloatingObjectTask
+    
 
     # Mappings from strings to environments
     task_map = {
@@ -84,6 +86,7 @@ def import_tasks():
         "RealmanFollowTarget": RealmanFollowTargetTask,
         "InspireHandRotateCube": InspireHandRotateCubeTask,
         "MovableInspireHandRRotateCube": MovableInspireHandRRotateCubeTask,
+        "FloatingObject": FloatingObjectTask,
     }
 
     task_map_warp = {
