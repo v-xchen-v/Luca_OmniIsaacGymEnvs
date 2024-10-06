@@ -39,7 +39,7 @@ class FloatingObjectTask(FloatingObjectBasicTask):
             self._num_observations = 42 # 42 # 30
         else:
             # self._num_observations = 54 # 42
-            self._num_observations = 19 # 42
+            self._num_observations = 41 # 42
         # 12: inspire hand joints position (action space)
         # 12: inspire hand joints velocity
         # 3: object position
@@ -329,6 +329,31 @@ class FloatingObjectTask(FloatingObjectBasicTask):
         # self.hand_root_shift = self.right_hand_pos - self.hand_root_pos
         self.hand_root_shift = self.right_hand_palm_pos - self.hand_root_pos
         # print(self.hand_root_shift[:4])
+        
+        
+        # hand_points = torch.concat([self.right_hand_pos.unsqueeze(1), self.right_hand_palm_pos.unsqueeze(1), 
+        #                        self.right_hand_ff_pos.unsqueeze(1), self.right_hand_mf_pos.unsqueeze(1),
+        #                        self.right_hand_rf_pos.unsqueeze(1), self.right_hand_lf_pos.unsqueeze(1), 
+        #                        self.right_hand_th_pos.unsqueeze(1)],dim=1)
+        # hand_points += self._env_pos.unsqueeze(1)
+        # hand_points = hand_points.view(-1,3)
+        # object_points = self.object_points_vis.reshape(-1,3)
+        # points = torch.concat([hand_points, object_points],dim=0)
+        # points = points.detach().cpu().double().numpy()
+        # self.point_cloud_prim.GetPointsAttr().Set([Gf.Vec3f(*point) for point in points])
+        # self.point_cloud_prim.GetWidthsAttr().Set([0.005] * len(points))  # Example size
+  
+        # isaacsim_colors = [
+        #     (0.9, 0.1, 0.1),    # Red
+        #     (0.1, 0.9, 0.1),    # Green
+        #     (0.1, 0.1, 0.9),    # Blue
+        #     (0.9, 0.9, 0.1),    # Yellow
+        #     (0.9, 0.1, 0.9),    # Magenta
+        #     (0.1, 0.9, 0.9)     # Cyan
+        # ]
+
+        # self.point_cloud_prim.GetDisplayColorAttr().Set([Gf.Vec3f(*color) for color in isaacsim_colors])
+        
         self.compute_full_observations_single_action()
 
         # if self.obs_type == "full_no_vel":
@@ -345,15 +370,27 @@ class FloatingObjectTask(FloatingObjectBasicTask):
     def compute_full_observations_single_action(self, no_vel=False):
 
     
-        # self.obs_buf[:, 0 : self.num_hand_dofs] =  self.hand_dof_pos
-        # self.obs_buf[:,0:3] = self.object_pos #palm z
-        self.obs_buf[:,0:3] = self.actions[:,:3] #palm z
-        self.obs_buf[:, 3:6] = self.hand_dof_states[:,:3]
-        self.obs_buf[:, 6:9] = self.hand_dof_velocities[:,:3]
-        self.obs_buf[:, 9:12] = self.right_hand_palm_pos
-        self.obs_buf[:, 12:16] = self.right_hand_palm_rot
+        # self.obs_buf[:,0:3] = self.actions[:,:3] #palm z
+        # self.obs_buf[:, 3:6] = self.hand_dof_states[:,:3]
+        # self.obs_buf[:, 6:9] = self.hand_dof_velocities[:,:3]
+        # self.obs_buf[:, 9:12] = self.right_hand_palm_pos
+        # self.obs_buf[:, 12:16] = self.right_hand_palm_rot
+        # # self.obs_buf[:,3:6] = self.goal_pos
+        # self.obs_buf[:,16:19] = self.object_pos
+        # self.obs_buf[:,19:23] = self.object_rot
+        
+        
+        self.obs_buf[:,0:9] = self.actions #palm z
+        self.obs_buf[:, 9:12] = self.hand_dof_states[:,:3]
+        self.obs_buf[:, 12:18] = self.hand_dof_states[:,self.finger_dof_indices]
+        
+        self.obs_buf[:, 18:21] = self.hand_dof_velocities[:,:3]
+        self.obs_buf[:, 21:27] = self.hand_dof_velocities[:,self.finger_dof_indices]
+        self.obs_buf[:, 27:30] = self.right_hand_palm_pos
+        self.obs_buf[:, 30:34] = self.right_hand_palm_rot
         # self.obs_buf[:,3:6] = self.goal_pos
-        self.obs_buf[:,16:19] = self.object_pos
+        self.obs_buf[:,34:37] = self.object_pos
+        self.obs_buf[:,37:41] = self.object_rot
         # # 18 - 36
         # self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel 
         # self.obs_buf[:, 36:39] = self.object_pos
