@@ -65,6 +65,7 @@ env:
 sim:
   dt: 0.0083 # 1/120 s
   gravity: [0.0, 0.0, -9.81]
+  # gravity: [0.0, 0.0, 0.0]
   add_ground_plane: True
   add_distant_light: False
   use_gpu_pipeline: ${eq:${...pipeline},"gpu"}
@@ -76,12 +77,12 @@ sim:
   enable_cameras: False
 
   default_material:
-    static_friction: 1.0
-    dynamic_friction: 1.0
+    # static_friction: 1.0
+    # dynamic_friction: 1.0
     # static_friction: 2.0
     # dynamic_friction: 2.0
-    # static_friction: 10.0
-    # dynamic_friction: 10.0
+    static_friction: 10.0
+    dynamic_friction: 10.0
     restitution: 0.0
 
   physx:

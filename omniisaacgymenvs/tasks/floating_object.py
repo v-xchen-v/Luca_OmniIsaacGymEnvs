@@ -39,7 +39,7 @@ class FloatingObjectTask(FloatingObjectBasicTask):
             self._num_observations = 42 # 42 # 30
         else:
             # self._num_observations = 54 # 42
-            self._num_observations = 41 # 42
+            self._num_observations = 110 # 42
         # 12: inspire hand joints position (action space)
         # 12: inspire hand joints velocity
         # 3: object position
@@ -160,11 +160,13 @@ class FloatingObjectTask(FloatingObjectBasicTask):
         # self.object_start_translation = torch.tensor([0.01, 0.01, 0.5], device=self.device)
         # self.object_start_translation = torch.tensor([0.09, -0.15, 0.5], device=self.device)
         # self.object_start_translation = torch.tensor([0.09, -0.15, 0.08], device=self.device)
-        self.object_start_translation = torch.tensor([0.0, -0.07, 0.08], device=self.device)
+        # self.object_start_translation = torch.tensor([0.0, -0.07, 0.08], device=self.device)
+        # self.object_start_translation = torch.tensor([0.0, -0.12, 0.08], device=self.device)
+        self.object_start_translation = torch.tensor([0.01, -0.12, 0.04], device=self.device)
         # self.object_start_translation = torch.tensor([-0.0303, -0.0696, 0.08], device=self.device)
         # self.object_start_translation = torch.tensor([0.12, 0.12, 0.1], device=self.device)
-        # self.object_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
-        self.object_start_orientation = torch.tensor([0.7071, 0., 0., -0.7071], device=self.device) # vertical to hand init pose
+        self.object_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
+        # self.object_start_orientation = torch.tensor([0.7071, 0., 0., -0.7071], device=self.device) # vertical to hand init pose
         # self.hand_start_orientation = torch.tensor([0.257551, 0.283045, 0.683330, -0.621782], device=self.device)
         # 90 degree rotation in Y
         # self.hand_start_orientation = torch.tensor([0.7071, -0.7072, 0.0, 0.0], device=self.device)
@@ -257,7 +259,7 @@ class FloatingObjectTask(FloatingObjectBasicTask):
 
 
 
-        self.hand_dof_states = self._hands.get_joint_positions()
+        self.hand_dof_pos = self._hands.get_joint_positions()
         self.hand_dof_velocities = self._hands.get_joint_velocities()
 
         self.link_pose = self._hands.fingers.get_world_poses()
@@ -316,8 +318,10 @@ class FloatingObjectTask(FloatingObjectBasicTask):
         self.right_hand_pc_dist = torch.where(self.right_hand_pc_dist >= 0.5, 0.5 + 0 * self.right_hand_pc_dist, self.right_hand_pc_dist)
 
         self.right_hand_finger_pos = torch.stack([self.right_hand_ff_pos, self.right_hand_mf_pos, self.right_hand_rf_pos, self.right_hand_lf_pos, self.right_hand_th_pos], dim=1)
+        self.right_hand_finger_rot = torch.stack([self.right_hand_ff_rot, self.right_hand_mf_rot, self.right_hand_rf_rot, self.right_hand_lf_rot, self.right_hand_th_rot], dim=1)
         self.right_hand_finger_pc_dist = torch.sum(batch_sided_distance(self.right_hand_finger_pos, self.object_points), dim=-1)
         self.right_hand_finger_pc_dist = torch.where(self.right_hand_finger_pc_dist >= 3.0, 3.0 + 0 * self.right_hand_finger_pc_dist, self.right_hand_finger_pc_dist)
+        self.right_hand_finger_pc_dist_individual = batch_sided_distance(self.right_hand_finger_pos, self.object_points)
         # a = batch_sided_distance(self.right_hand_finger_pos, self.object_points)
         # print('finger: \n')
         # print(a[:4])
@@ -371,18 +375,20 @@ class FloatingObjectTask(FloatingObjectBasicTask):
 
     
         # self.obs_buf[:,0:3] = self.actions[:,:3] #palm z
-        # self.obs_buf[:, 3:6] = self.hand_dof_states[:,:3]
+        # self.obs_buf[:, 3:6] = self.hand_dof_pos[:,:3]
         # self.obs_buf[:, 6:9] = self.hand_dof_velocities[:,:3]
         # self.obs_buf[:, 9:12] = self.right_hand_palm_pos
         # self.obs_buf[:, 12:16] = self.right_hand_palm_rot
         # # self.obs_buf[:,3:6] = self.goal_pos
         # self.obs_buf[:,16:19] = self.object_pos
         # self.obs_buf[:,19:23] = self.object_rot
-        
-        
+        # timestep 29
+        time_encode = torch.cat([self.progress_buf.unsqueeze(-1), compute_time_encoding(self.progress_buf, 28)], dim=-1)
+        finger_pos = self.right_hand_finger_pos.reshape(-1, 5 * 3)
+        finger_rot = self.right_hand_finger_rot.reshape(-1, 5 *4)
         self.obs_buf[:,0:9] = self.actions #palm z
-        self.obs_buf[:, 9:12] = self.hand_dof_states[:,:3]
-        self.obs_buf[:, 12:18] = self.hand_dof_states[:,self.finger_dof_indices]
+        self.obs_buf[:, 9:12] = self.hand_dof_pos[:,:3]
+        self.obs_buf[:, 12:18] = self.hand_dof_pos[:,self.finger_dof_indices]
         
         self.obs_buf[:, 18:21] = self.hand_dof_velocities[:,:3]
         self.obs_buf[:, 21:27] = self.hand_dof_velocities[:,self.finger_dof_indices]
@@ -391,6 +397,10 @@ class FloatingObjectTask(FloatingObjectBasicTask):
         # self.obs_buf[:,3:6] = self.goal_pos
         self.obs_buf[:,34:37] = self.object_pos
         self.obs_buf[:,37:41] = self.object_rot
+        self.obs_buf[:, 41:56] = finger_pos
+        self.obs_buf[:, 56:76] = finger_rot
+        self.obs_buf[:, 76:81] = self.right_hand_finger_pc_dist_individual
+        self.obs_buf[:, 81:110] = time_encode
         # # 18 - 36
         # self.obs_buf[:, self.num_hand_dofs : 2 * self.num_hand_dofs] = self.vel_obs_scale * self.hand_dof_vel 
         # self.obs_buf[:, 36:39] = self.object_pos
@@ -469,3 +479,14 @@ class FloatingObjectTask(FloatingObjectBasicTask):
 
 def to_torch(x, dtype=torch.float, device='cuda:0', requires_grad=False):
     return torch.tensor(x, dtype=dtype, device=device, requires_grad=requires_grad)
+
+def compute_time_encoding(time, dimension):
+    # Create a tensor for dimension indices: [0, 1, 2, ..., dimension-1]
+    div_term = torch.arange(0, dimension, 2, dtype=torch.float32) * -(torch.log(torch.tensor(10000.0)) / dimension)
+    div_term = torch.exp(div_term).unsqueeze(0).to(time.device)  # Shape: (1, dimension/2)
+    # Apply sin to even indices in the array; 2i
+    encoding = torch.zeros(time.shape[0], dimension).to(time.device)
+    encoding[:, 0::2] = torch.sin(time.unsqueeze(1) * div_term)
+    # Apply cos to odd indices in the array; 2i+1
+    encoding[:, 1::2] = torch.cos(time.unsqueeze(1) * div_term)
+    return encoding
