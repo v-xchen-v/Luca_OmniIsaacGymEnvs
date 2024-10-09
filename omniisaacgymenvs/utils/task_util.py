@@ -57,6 +57,7 @@ def import_tasks():
     from omniisaacgymenvs.tasks.inspire_hand import InspireHandRotateCubeTask
     from omniisaacgymenvs.tasks.movable_inspire_R import MovableInspireHandRRotateCubeTask
     from omniisaacgymenvs.tasks.floating_object import FloatingObjectTask
+    from omniisaacgymenvs.tasks.horizontal_grasp_lift import HorizontalGraspTask
     
 
     # Mappings from strings to environments
@@ -87,6 +88,7 @@ def import_tasks():
         "InspireHandRotateCube": InspireHandRotateCubeTask,
         "MovableInspireHandRRotateCube": MovableInspireHandRRotateCubeTask,
         "FloatingObject": FloatingObjectTask,
+        "HorizontalGrasp": HorizontalGraspTask,
     }
 
     task_map_warp = {
