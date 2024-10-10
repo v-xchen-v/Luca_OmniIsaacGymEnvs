@@ -57,7 +57,9 @@ class MovableInspireHandR(Robot):
             # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
             # self._usd_path = "/home/wenbo/Documents/repos/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
             # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
-            self._usd_path = "/home/wenbo/R_inspire_constrained.usd"
+            # self._usd_path = "/home/wenbo/R_inspire_constrained.usd"
+            self._usd_path = "/home/wenbo/R_inspire_1009_v3_maxforce10000_fixed.usd"
+            # self._usd_path = "/home/wenbo/R_inspire_constrained_all_2.usd"
         self._position = torch.tensor([0.0, 0.0, 0.5]) if translation is None else translation
         self._orientation = (
             torch.tensor([0.257551, 0.283045, 0.683330, -0.621782]) if orientation is None else orientation

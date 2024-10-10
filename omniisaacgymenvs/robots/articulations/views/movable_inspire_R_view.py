@@ -45,7 +45,8 @@ class MovableInspireRView(ArticulationView):
         self._actuated_dof_indices = list()
         self.fingers = RigidPrimView(
             # prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire_mimic_noflange_movable_totest_2/R_inspire/R*',
-            prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire_mimic_noflange_movable_tested/R_inspire_mimic_noflange_movable_totest_2/R_inspire/R*',
+            # prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire_mimic_noflange_movable_tested/R_inspire_mimic_noflange_movable_totest_2/R_inspire/R*', # previous
+            prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire/R*', # Xi fixed
             name="finger_view",
             reset_xform_properties=False,
         )
