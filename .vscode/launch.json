@@ -152,7 +152,8 @@
             "args": [
                 "task=HorizontalGrasp",
                 "num_envs=16",
-                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/InspireHandRotateCube/nn/InspireHandRotateCube.pth"
+                // "test=True",
+                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/HorizontalGrasp/nn/HorizontalGrasp.pth"
                 // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ],
             // "justMyCode": false

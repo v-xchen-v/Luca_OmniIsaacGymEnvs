@@ -142,7 +142,7 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
     #     # dummy observation
     #     self.obs_buf = torch.zeros(
     #         (self._num_envs, self._num_observations), device=self.device, dtype=torch.float)
-    #         # self._num_observations, device=self.device, dtype=torch.float)
+    #         # self._num_observations, device=self.device, dtype=torch.float)l
     #     observations = {self._inspire_hand_R.name: {"obs_buf": self.obs_buf}}
     #     return observations
 
@@ -151,61 +151,17 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
     #     self.hand_start_orientation = torch.tensor([-1.0, 0.0, 0.0, 0.0], device=self.device)
     #     self.pose_dy, self.pose_dz = -0.39, 0.10
     def get_starting_positions(self):
-        # self.hand_start_translation = torch.tensor([0.01, 0.01, 0.5], device=self.device)
-        # self.hand_start_translation = torch.tensor([0.01, 0.01, 0.85], device=self.device) # using table
+   
         self.hand_start_translation = torch.tensor([0.01, 0.01, 0.2], device=self.device) # object falls on the ground
-        # self.hand_start_translation = torch.tensor([0.1, 0.03, 0.75], device=self.device) # object falls on the ground
         self.hand_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
-        # self.hand_start_orientation = torch.tensor([0.7071, 0., -0.7071, 0.], device=self.device)
-        # self.hand_start_orientation = torch.tensor([0.7071, 0., 0.7071, 0.], device=self.device)
         self.table_start_translation = torch.tensor([0.01, 0.01, 0.], device=self.device)
-        # self.object_start_translation = torch.tensor([0.01, 0.01, 0.5], device=self.device)
-        # self.object_start_translation = torch.tensor([0.09, -0.15, 0.5], device=self.device)
-        # self.object_start_translation = torch.tensor([0.09, -0.15, 0.08], device=self.device)
-        # self.object_start_translation = torch.tensor([0.0, -0.07, 0.08], device=self.device)
-        # self.object_start_translation = torch.tensor([0.0, -0.12, 0.08], device=self.device)
-        # self.object_start_translation = torch.tensor([0.01, -0.12, 0.04], device=self.device) # car 
-        # self.object_start_translation = torch.tensor([0.08, -0.15, 0.04], device=self.device)
-        self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device)
-        # self.object_start_translation = torch.tensor([-0.0303, -0.0696, 0.08], device=self.device)
-        # self.object_start_translation = torch.tensor([0.12, 0.12, 0.1], device=self.device)
-        # self.object_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
-        # self.object_start_orientation = torch.tensor([0.9239, 0., 0., 0.3827], device=self.device)
-        # self.object_start_orientation = torch.tensor([0.7071, 0., 0., -0.7071], device=self.device) # vertical to hand init pose
+    
+        # self.object_start_translation = torch.tensor([0.05, -0.10, 0.04], device=self.device) # for static grasping
+        self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device) # for training
         self.object_start_orientation = torch.tensor([0.7071, -0.7071, 0., 0], device=self.device) # vertical to hand init pose
-        # self.hand_start_orientation = torch.tensor([0.257551, 0.283045, 0.683330, -0.621782], device=self.device)
-        # 90 degree rotation in Y
-        # self.hand_start_orientation = torch.tensor([0.7071, -0.7072, 0.0, 0.0], device=self.device)
-        # 90 degree rotation in Y, 5 degree in X
-        # self.hand_start_orientation = torch.tensor([0.7064, -0.7065, 0.0309, 0.0308], device=self.device)
-        # 90 degree rotation in Y, 5 degree in X, and more 10 degree in Y
-        # self.hand_start_orientation = torch.tensor([0.6421, -0.7654, 0.028, 0.0334], device=self.device)
-        # # 90 degree rotation in Y, 5 degree in X, and more 20 degree in Y
-        # self.hand_start_orientation = torch.tensor([0.573, -0.8184, 0.025, 0.0357], device=self.device)
-        
-        #  # 90 degree rotation in Y, -5 degree in X, and more 20 degree in Y
-        # self.hand_start_orientation = torch.tensor([0.573, -0.8184, -0.025, 0.0357], device=self.device)
-        # 90 degree rotation in Y, -15 degree in X, and more 20 degree in Y
-        # self.hand_start_orientation = torch.tensor([0.5686, -0.8122, -0.0749, -0.107], device=self.device)
-        # 90 degree rotation in Y, -20 degree in X, and more 20 degree in Y
-        # self.hand_start_orientation = torch.tensor([0.5648, -0.8086, -0.0997, -0.1423], device=self.device)
-        
-        # 90 degree rotation in Y, -20 degree in X, and more 30 degree in Y
-        # self.hand_start_orientation = torch.tensor([0.4924, -0.8529, -0.0869, -0.1504], device=self.device)
-        # self.hand_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
-        # self.hand_start_orientation = torch.tensor([0.5, 0.5, -0.5, -0.5], device=self.device)
-        # self.hand_start_orientation = torch.tensor([0.707, 0.707, 0., 0.], device=self.device)
-        
-        
-        # self.hand_start_orientation = torch.tensor([0.6532, -0.6533, 0.2706, 0.2705], device=self.device)
-        # 75 degree rotation in Y
-        # self.hand_start_orientation = torch.tensor([0.7933, -0.6088, 0.0, 0.0], device=self.device)
-        # self.pose_dy, self.pose_dz = 0.15, 0.01
-        # # self.pose_dx = -0.05 # object scale 1.0
-        # self.pose_dx = -0.01 # object scale 0.9, close to thumb for a little bit 
+
            
         self.pose_dy, self.pose_dz = 0., 0.
-        # self.pose_dx = -0.05 # object scale 1.0
         self.pose_dx = 0. # object scale 0.9, close to thumb for a little bit    
     #Ref: omniisaacgymenvs/tasks/franka_deformable.py
     def get_hand(self):
