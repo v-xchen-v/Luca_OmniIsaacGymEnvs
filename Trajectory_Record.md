@@ -49,6 +49,14 @@ Actuated dof
 ### hand_dof_pos_buf 
 Joint states of all 18 dof, shape: [200, 1, 18], where 200 is trajectory length and 1 is num of environments.
 
+**Note**: first 6 dof are base xyz and rpy, controlling the pose of hand in **its own** coordinate system, which is posed in environment coordinate system by **hand_start_translation** and **hand_start_orientation**. For example:
+```python
+self.hand_start_translation = torch.tensor([0.01, 0.01, 0.2], device=self.device)
+self.hand_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
+```
+This set origin of hand coordinate system to [0.01, 0.0.1, 0.2] in env coordinate system, and XYZ axes are aligned. Therefore if base xyz joints are [0.1, -0.1, -0.13], the actual position of **R_hand_base_link** is at [0.11, -0.09, 0.07].
+
+
 ### hand_dof_velocities_buf 
 Joint velocities of all 18 dof, shape: [200, 1, 18].
 
