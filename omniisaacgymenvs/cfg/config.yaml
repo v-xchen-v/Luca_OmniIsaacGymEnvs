@@ -51,13 +51,17 @@ mt_timeout: 300
 # enable_recording: False
 enable_recording: True
 # interval between video recordings (in steps)
-recording_interval: 2000
+# recording_interval: 2000
+recording_interval: 200
 # length of the recorded video (in steps)
-recording_length: 600
+# recording_length: 600
+recording_length: 200
 # fps for writing recorded video
 recording_fps: 30
 # directory to save recordings in
-recording_dir: '/mnt/zl_dev/Render'
+recording_dir: '/mnt/zl_dev/Render_1011'
+trajectory_dir: '/mnt/zl_dev/traj_1011'
+enable_trajectory_recording: True
 
 wandb_activate: False
 wandb_group: ''

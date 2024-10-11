@@ -233,54 +233,43 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         idx = 0
         self.right_hand_pos = self.link_pos[:, idx, :]
         self.right_hand_rot = self.link_rot[:, idx, :]
-        idx = 13
-        self.hand_root_pos = self.link_pos[:, idx, :]
-        self.hand_root_rot = self.link_rot[:, idx, :]
 
-        # self.right_hand_palm_pos = self.link_pos[:, idx, :]
-        # self.right_hand_palm_pos = self.right_hand_pos + quat_apply_wxyz(self.right_hand_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.08)
+        idx = 13
+        self.right_hand_root_pos = self.link_pos[:, idx, :]
+        self.right_hand_root_rot = self.link_rot[:, idx, :]
+        # print(self.right_hand_root_pos)
+
         self.right_hand_palm_pos = self.right_hand_pos + quat_apply_wxyz(self.right_hand_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.11)
-        # self.right_hand_palm_pos = self.right_hand_pos + quat_apply(self.right_hand_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)
-        # self.right_hand_palm_pos = self.right_hand_pos + quat_apply(self.right_hand_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)
         self.right_hand_palm_pos = self.right_hand_palm_pos + quat_apply_wxyz(self.right_hand_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.015)
         self.right_hand_palm_pos = self.right_hand_palm_pos + quat_apply_wxyz(self.right_hand_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * 0.01)
         self.right_hand_palm_rot = self.link_rot[:, 0, :]
         idx = self.link_dict['R_index_intermediate']
         self.right_hand_ff_pos = self.link_pos[:, idx, :]
         self.right_hand_ff_rot = self.link_rot[:, idx, :]
-        # self.right_hand_ff_pos = self.right_hand_ff_pos + quat_apply_wxyz(self.right_hand_ff_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.02)
         self.right_hand_ff_pos = self.right_hand_ff_pos + quat_apply_wxyz(self.right_hand_ff_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.035)
         self.right_hand_ff_pos = self.right_hand_ff_pos + quat_apply_wxyz(self.right_hand_ff_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.005)
         self.right_hand_ff_pos = self.right_hand_ff_pos + quat_apply_wxyz(self.right_hand_ff_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * -0.005)
-        # self.right_hand_ff_pos = self.right_hand_ff_pos + quat_apply(self.right_hand_ff_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)
         idx = self.link_dict['R_middle_intermediate']
         self.right_hand_mf_pos = self.link_pos[:, idx, :]
         self.right_hand_mf_rot = self.link_rot[:, idx, :]
-        # self.right_hand_mf_pos = self.right_hand_mf_pos + quat_apply_wxyz(self.right_hand_mf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.02)
         self.right_hand_mf_pos = self.right_hand_mf_pos + quat_apply_wxyz(self.right_hand_mf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.035)
         self.right_hand_mf_pos = self.right_hand_mf_pos + quat_apply_wxyz(self.right_hand_mf_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.005)
         self.right_hand_mf_pos = self.right_hand_mf_pos + quat_apply_wxyz(self.right_hand_mf_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * -0.005)
-        # self.right_hand_mf_pos = self.right_hand_mf_pos + quat_apply(self.right_hand_mf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)
         idx = self.link_dict['R_ring_intermediate']
         self.right_hand_rf_pos = self.link_pos[:, idx, :]
         self.right_hand_rf_rot = self.link_rot[:, idx, :]
-        # self.right_hand_rf_pos = self.right_hand_rf_pos + quat_apply_wxyz(self.right_hand_rf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.02)
         self.right_hand_rf_pos = self.right_hand_rf_pos + quat_apply_wxyz(self.right_hand_rf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.035)
         self.right_hand_rf_pos = self.right_hand_rf_pos + quat_apply_wxyz(self.right_hand_rf_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.005)
         self.right_hand_rf_pos = self.right_hand_rf_pos + quat_apply_wxyz(self.right_hand_rf_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * -0.005)
-        # self.right_hand_rf_pos = self.right_hand_rf_pos + quat_apply(self.right_hand_rf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)
         idx = self.link_dict['R_pinky_intermediate']
         self.right_hand_lf_pos = self.link_pos[:, idx, :]
         self.right_hand_lf_rot = self.link_rot[:, idx, :]
-        # self.right_hand_lf_pos = self.right_hand_lf_pos + quat_apply_wxyz(self.right_hand_lf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.02)
         self.right_hand_lf_pos = self.right_hand_lf_pos + quat_apply_wxyz(self.right_hand_lf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.035)
         self.right_hand_lf_pos = self.right_hand_lf_pos + quat_apply_wxyz(self.right_hand_lf_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * -0.005)
         self.right_hand_lf_pos = self.right_hand_lf_pos + quat_apply_wxyz(self.right_hand_lf_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * -0.005)
-        # self.right_hand_lf_pos = self.right_hand_lf_pos + quat_apply(self.right_hand_lf_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * -0.02)
         idx = self.link_dict['R_thumb_distal']
         self.right_hand_th_pos = self.link_pos[:, idx, :]
         self.right_hand_th_rot = self.link_rot[:, idx, :]
-        # self.right_hand_th_pos = self.right_hand_th_pos + quat_apply_wxyz(self.right_hand_th_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.005)
         self.right_hand_th_pos = self.right_hand_th_pos + quat_apply_wxyz(self.right_hand_th_rot,to_torch([1, 0, 0], device=self.device).repeat(self.num_envs, 1) * 0.015)
         self.right_hand_th_pos = self.right_hand_th_pos + quat_apply_wxyz(self.right_hand_th_rot,to_torch([0, 1, 0], device=self.device).repeat(self.num_envs, 1) * 0.015)
         self.right_hand_th_pos = self.right_hand_th_pos + quat_apply_wxyz(self.right_hand_th_rot,to_torch([0, 0, 1], device=self.device).repeat(self.num_envs, 1) * -0.005)
@@ -303,8 +292,8 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         # print('base link \n')
         # print(self.right_hand_pos)
         # print('\n')
-        # self.hand_root_shift = self.right_hand_pos - self.hand_root_pos
-        self.hand_root_shift = self.right_hand_palm_pos - self.hand_root_pos
+        # self.hand_root_shift = self.right_hand_pos - self.right_hand_root_pos
+        self.hand_root_shift = self.right_hand_palm_pos - self.right_hand_root_pos
         # print(self.hand_root_shift[:4])
         
         
@@ -347,7 +336,10 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         ]
 
         self.point_cloud_prim.GetDisplayColorAttr().Set([Gf.Vec3f(*color) for color in isaacsim_colors])
-        self.compute_full_observations_single_action()
+        self.compute_full_observations()
+        if self.trajectory_recording:
+            
+            self.compute_frame_record()
 
         # if self.obs_type == "full_no_vel":
         #     self.compute_full_observations(True)
@@ -356,51 +348,71 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         # else:
         #     print("Unkown observations type!")
 
+        # if self.test:
+            # self.record_buf.append(self.obs_buf)
+        
         observations = {'object': {"obs_buf": self.obs_buf}}
         return observations
-
-
-    def compute_full_observations_single_action(self, no_vel=False):
-
     
-        # xyz only
-        # time_encode = torch.cat([self.progress_buf.unsqueeze(-1), compute_time_encoding(self.progress_buf, 28)], dim=-1)
-        # finger_pos = self.right_hand_finger_pos.reshape(-1, 5 * 3)
-        # finger_rot = self.right_hand_finger_rot.reshape(-1, 5 *4)
-        # self.obs_buf[:,0:9] = self.actions #palm z
-        # self.obs_buf[:, 9:12] = self.hand_dof_pos[:,:3]
-        # self.obs_buf[:, 12:18] = self.hand_dof_pos[:,self.finger_dof_indices]
+    def compute_frame_record(self):
         
-        # self.obs_buf[:, 18:21] = self.hand_dof_velocities[:,:3]
-        # self.obs_buf[:, 21:27] = self.hand_dof_velocities[:,self.finger_dof_indices]
-        # self.obs_buf[:, 27:30] = self.right_hand_palm_pos
-        # self.obs_buf[:, 30:34] = self.right_hand_palm_rot
-        # self.obs_buf[:,34:37] = self.object_pos
-        # self.obs_buf[:,37:41] = self.object_rot
-        # self.obs_buf[:, 41:56] = finger_pos
-        # self.obs_buf[:, 56:76] = finger_rot
-        # self.obs_buf[:, 76:81] = self.right_hand_finger_pc_dist_individual
-        # self.obs_buf[:, 81:110] = time_encode
+     
+        lowest = torch.min(self.object_points[:, :, -1], dim=1)[0]
+        max_finger_dist = 0.3 
+        max_hand_dist = 0.06
+        max_goal_dist = 0.05
+        hand_up_goal_dist = 1.0
+        
+   
+        
+        delta_init_qpos_value = torch.norm(self.hand_dof_pos[:,self.finger_dof_indices] - self.hand_dof_pregrasp_pos[self.finger_dof_indices], p=1, dim=-1) # pass
+        right_hand_dist = self.right_hand_pc_dist
+        right_hand_finger_dist = self.right_hand_finger_pc_dist
+        goal_dist = torch.norm(self.goal_pos - self.object_pos, p=2, dim=-1) # zl *
+        goal_hand_dist = torch.norm(self.goal_pos - self.right_hand_palm_pos, p=2, dim=-1)
+        
+        hold_value = 2
+        hold_flag = (right_hand_finger_dist <= max_finger_dist).int() + (right_hand_dist <= max_hand_dist).int()
+        
+            # # ---------------------- Reward After Holding ---------------------- # #
+        # Distanc from object pos to goal target pos
+        goal_rew = torch.zeros_like(goal_dist)
+        goal_rew = torch.where(hold_flag == hold_value, 1.0 * (0.9 - 2.0 * goal_dist), goal_rew)
+        # Distance from hand pos to goal target pos
+        hand_up = torch.zeros_like(goal_dist)
+        hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 0.1 * self.actions[:, 2], hand_up), hand_up)
+        hand_up = torch.where(lowest >= 0.20, torch.where(hold_flag == hold_value, 0.2 - goal_hand_dist * 0 + hand_up_goal_dist * (0.2 - goal_dist), hand_up), hand_up)
+        # Already hold the object and Already reach the goal
+        bonus = torch.zeros_like(goal_dist)
+        bonus = torch.where(hold_flag == hold_value, torch.where(goal_dist <= max_goal_dist, 1.0 / (1 + 10 * goal_dist), bonus), bonus)
+            
         
         
-        # time_encode = torch.cat([self.progress_buf.unsqueeze(-1), compute_time_encoding(self.progress_buf, 28)], dim=-1)
-        # finger_pos = self.right_hand_finger_pos.reshape(-1, 5 * 3)
-        # finger_rot = self.right_hand_finger_rot.reshape(-1, 5 *4)
-        # self.obs_buf[:,0:12] = self.actions #palm z
-        # self.obs_buf[:, 12:18] = self.hand_dof_pos[:,:6]
-        # self.obs_buf[:, 18:24] = self.hand_dof_pos[:,self.finger_dof_indices]
-        
-        # self.obs_buf[:, 24:30] = self.hand_dof_velocities[:,:6]
-        # self.obs_buf[:, 30:36] = self.hand_dof_velocities[:,self.finger_dof_indices]
-        # self.obs_buf[:, 36:39] = self.right_hand_palm_pos
-        # self.obs_buf[:, 39:43] = self.right_hand_palm_rot
-        # self.obs_buf[:,43:46] = self.object_pos
-        # self.obs_buf[:,46:50] = self.object_rot
-        # self.obs_buf[:, 50:65] = finger_pos
-        # self.obs_buf[:, 65:85] = finger_rot
-        # self.obs_buf[:, 85:90] = self.right_hand_finger_pc_dist_individual
-        # self.obs_buf[:, 90:119] = time_encode
-       
+        init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -0.5 * goal_dist
+        # init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -0.5 * goal_dist + action_penalty_scale * action_penalty
+
+        grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus
+        # grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus + action_penalty_scale * action_penalty
+        reward = torch.where(hold_flag != hold_value, init_reward, grasp_reward)
+        self.hand_dof_pos_buf.append(self.hand_dof_pos)
+        self.hand_dof_velocities_buf.append(self.hand_dof_velocities)
+        self.action_buf.append(self.actions)
+        self.cur_targets_buf.append(self.cur_targets)
+        self.right_hand_base_pose_buf.append(torch.concatenate([self.right_hand_pos,self.right_hand_rot],dim=1))
+        self.right_hand_palm_pose_buf.append(torch.concatenate([self.right_hand_palm_pos,self.right_hand_palm_rot],dim=1))
+        self.object_pose_buf.append(torch.concatenate([self.object_pos,self.object_rot],dim=1))
+        self.goal_pos
+        self.hand_dof_default_pos
+        self.hand_start_translation
+        self.hand_start_orientation
+        self.obj_to_goal_dist_buf.append(self.goal_pos - self.object_pos)
+        self.hold_flag_buf.append(hold_flag)
+        self.lowest_buf.append(lowest)
+        self.goal_reach_buf.append(goal_dist <= max_goal_dist)
+
+
+    def compute_full_observations(self, no_vel=False):
+
 
         # full finger states
         time_encode = torch.cat([self.progress_buf.unsqueeze(-1), compute_time_encoding(self.progress_buf, 28)], dim=-1)
@@ -419,7 +431,10 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         self.obs_buf[:, 97:102] = self.right_hand_finger_pc_dist_individual
         self.obs_buf[:, 102:131] = time_encode
         self.obs_buf[:, 131:134] = self.goal_pos - self.object_pos
-       
+
+        
+        
+      
     # # ---------------------- Compute Full State: ShadowHand and Object Pose ---------------------- # #
     def get_unpose_quat(self):
         if self.repose_z:

@@ -117,6 +117,14 @@ class HorizontalGraspBasicTask(RLTask):
         self.dt = 1.0 / 120
         # self.dt = 0.166
         control_freq_inv = self._task_cfg["env"].get("controlFrequencyInv", 1)
+        self.test = self._cfg['test']
+        self.enable_trajectory_recording = self._cfg['enable_trajectory_recording']
+        self.trajectory_recording = False
+        if self.test:
+            if self.enable_trajectory_recording:
+                self.trajectory_recording = True
+                self.trajectory_dir = self._cfg['trajectory_dir']
+                os.makedirs(self.trajectory_dir,exist_ok=True)
         if self.reset_time > 0.0:
             self.max_episode_length = int(round(self.reset_time / (control_freq_inv * self.dt)))
             print("Reset time: ", self.reset_time)
@@ -295,7 +303,8 @@ class HorizontalGraspBasicTask(RLTask):
         )
 
     def post_reset(self):
-                
+
+        
         self.num_hand_dofs = self._hands.num_dof
         self.hand_dof_default_pos = torch.zeros(self.num_hand_dofs, dtype=torch.float, device=self.device)
         self.hand_dof_default_pos[2] = -0.13
@@ -346,6 +355,11 @@ class HorizontalGraspBasicTask(RLTask):
 
         # randomize all envs
         indices = torch.arange(self._num_envs, dtype=torch.int64, device=self._device)
+        if self.trajectory_recording:
+            self.record_buf = []
+            self.record_traj_id = 0
+            self.reset_record_buf()
+        
         self.reset_idx(indices)
 
         if self._dr_randomizer.randomize:
@@ -403,6 +417,7 @@ class HorizontalGraspBasicTask(RLTask):
             self.fall_penalty,
             self.max_consecutive_successes,
             self.av_factor,
+            torch.tensor(self.test)
         )
 
         self.extras["consecutive_successes"] = self.consecutive_successes.mean()
@@ -427,7 +442,7 @@ class HorizontalGraspBasicTask(RLTask):
     def pre_physics_step(self, actions):
         if not self.world.is_playing():
             return
-
+        print(self._env.recording)
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
 
@@ -481,10 +496,10 @@ class HorizontalGraspBasicTask(RLTask):
         
         # target_hand_dof[:,:3] += actions[:,:3] * 0.05
         # target_hand_dof[:,:3] += actions[:,:3] * 0.33
-        target_hand_dof[:,:3] += actions[:,:3] * 0.05
+        target_hand_dof[:,:3] += actions[:,:3] * 0.05 # 0.05
         target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # rotation set to default pose
-        target_hand_dof[:,6:10] += actions[:,6:10]* 0.5 #slower move for other 4 fingers
-        target_hand_dof[:,10:12] += actions[:,10:12]* 0.5 #faster move for thumb
+        target_hand_dof[:,6:10] += actions[:,6:10]* 0.5 # 0.5
+        target_hand_dof[:,10:12] += actions[:,10:12]* 0.5 # 0.5
         # target_hand_dof[:,6:10] += actions[:,6:10] #slower move for other 4 fingers
         # target_hand_dof[:,10:12] += actions[:,10:12] #faster move for thumb
         self.cur_targets[:, joint_indices] = 0.2 * target_hand_dof + 0.8 * self.prev_targets[:, joint_indices] # smoothing
@@ -497,6 +512,34 @@ class HorizontalGraspBasicTask(RLTask):
         self.prev_targets = self.cur_targets
         
         
+        # # # finger absolute action
+        # self.actions = actions.clone().to(self.device)
+        # joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
+        # hand_dof = self.hand_dof_pos
+        # target_hand_dof = hand_dof[:, joint_indices]
+        
+        # lower_limit = torch.tensor([-1, -1, -0.14]).cuda()
+        # upper_limit = torch.tensor([1, 1, 1]).cuda()
+        
+        # # target_hand_dof[:,:3] += actions[:,:3] * 0.05
+        # # target_hand_dof[:,:3] += actions[:,:3] * 0.33
+        # target_hand_dof[:,:3] += actions[:,:3] * 0.05 # 0.05
+        # target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # rotation set to default pose
+        # # target_hand_dof[:,6:] = actions[:,6:]
+        # target_hand_dof[:,6:] = scale(actions[:,6:],self.hand_dof_lower_limits[self.finger_dof_indices],self.hand_dof_upper_limits[self.finger_dof_indices])
+        
+        # # target_hand_dof[:,6:10] += actions[:,6:10]* 0.5 # 0.5
+        # # target_hand_dof[:,10:12] += actions[:,10:12]* 0.5 # 0.5
+        # # target_hand_dof[:,6:10] += actions[:,6:10] #slower move for other 4 fingers
+        # # target_hand_dof[:,10:12] += actions[:,10:12] #faster move for thumb
+        # self.cur_targets[:, joint_indices] = 0.2 * target_hand_dof + 0.8 * self.prev_targets[:, joint_indices] # smoothing
+        # self.cur_targets[:,self.base_trans_dof_indices] = torch.clamp(self.cur_targets[:,self.base_trans_dof_indices], lower_limit, upper_limit) # base action clamp
+        # self.cur_targets[:,self.base_rot_dof_indices] = torch.clamp(self.cur_targets[:,self.base_rot_dof_indices], self.hand_dof_lower_limits[self.base_rot_dof_indices], self.hand_dof_upper_limits[self.base_rot_dof_indices])
+        # self.cur_targets[:,self.finger_dof_indices] = torch.clamp(self.cur_targets[:,self.finger_dof_indices], 
+        #                                                 self.hand_dof_lower_limits[self.finger_dof_indices], 
+        #                                                 self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) # 1.0 to 0.8, to avoid finger break issue
+        # self._hands.set_joint_position_targets(self.cur_targets[:, joint_indices],joint_indices = joint_indices)
+        # self.prev_targets = self.cur_targets
         
         # self.action_buf.append(actions)
         # if self.progress_buf[0] == 199:
@@ -555,7 +598,60 @@ class HorizontalGraspBasicTask(RLTask):
         self._goals.set_world_poses(goal_pos[env_ids], goal_rot[env_ids], indices)
         self.reset_goal_buf[env_ids] = 0
 
+    def reset_record_buf(self):
+        
+        self.record_buf = {}
+        self.hand_dof_pos_buf = []
+        self.hand_dof_velocities_buf = []
+        self.action_buf = []
+        self.cur_targets_buf = []
+        self.right_hand_base_pose_buf = []
+        self.right_hand_palm_pose_buf = []
+        self.object_pose_buf = []
+        self.obj_to_goal_dist_buf = []
+        self.hold_flag_buf = []
+        self.lowest_buf = []
+        self.goal_reach_buf = []
+        self.goal_pos
+        self.hand_dof_default_pos
+        self.hand_start_translation
+        self.hand_start_orientation
+        
+    def gather_record_buf(self):
+        self.hand_dof_pos_buf = torch.stack(self.hand_dof_pos_buf).detach().cpu()
+        self.hand_dof_velocities_buf = torch.stack(self.hand_dof_velocities_buf).detach().cpu()
+        self.action_buf = torch.stack(self.action_buf).detach().cpu()
+        self.cur_targets_buf = torch.stack(self.cur_targets_buf).detach().cpu()
+        self.right_hand_base_pose_buf = torch.stack(self.right_hand_base_pose_buf).detach().cpu()
+        self.right_hand_palm_pose_buf = torch.stack(self.right_hand_palm_pose_buf).detach().cpu()
+        self.hold_flag_buf = torch.stack(self.hold_flag_buf).detach().cpu()
+        self.lowest_buf = torch.stack(self.lowest_buf).detach().cpu()
+        self.goal_reach_buf = torch.stack(self.goal_reach_buf).detach().cpu()
+        self.record_buf['hand_dof_pos_buf'] = self.hand_dof_pos_buf # [200, 1, 18]
+        self.record_buf['hand_dof_velocities_buf'] = self.hand_dof_velocities_buf # [200, 1, 18]
+        self.record_buf['action_buf'] = self.action_buf# [200, 1, 12] 
+        self.record_buf['cur_targets_buf'] = self.cur_targets_buf# [200, 1, 18]
+        self.record_buf['right_hand_base_pose_buf'] = self.right_hand_base_pose_buf# [200, 1, 7]
+        self.record_buf['right_hand_palm_pose_buf'] = self.right_hand_palm_pose_buf# [200, 1, 7]
+        self.record_buf['hold_flag_buf'] = self.hold_flag_buf# [200, 1]
+        self.record_buf['lowest_buf'] = self.lowest_buf# [200, 1]
+        self.record_buf['goal_reach_buf'] = self.goal_reach_buf# [200, 1]
+        self.record_buf['goal_pos'] = self.goal_pos.detach().cpu()# [1, 3]
+        self.record_buf['hand_dof_default_pos'] = self.hand_dof_default_pos.detach().cpu()# [18]
+        self.record_buf['hand_start_translation'] = self.hand_start_translation.detach().cpu()# [3]
+        self.record_buf['hand_start_orientation'] = self.hand_start_orientation.detach().cpu()# [4]
+    
     def reset_idx(self, env_ids):
+        if self.trajectory_recording:
+            if self._env.video_recorder is not None:
+                # self.video_path = os.path.join(self._cfg['recording_dir'], f"{self.record_traj_id:04d}.mp4")
+                # self.trajectory_path = os.path.join(self.trajectory_dir,f"{self.record_traj_id:04d}.npy")
+                self.trajectory_path = os.path.join(self.trajectory_dir,f"step-{self.record_traj_id*200}.npy")
+                self.gather_record_buf()
+                np.save(self.trajectory_path, self.record_buf)
+                self.reset_record_buf()
+                self.record_traj_id+=1
+                
         indices = env_ids.to(dtype=torch.int32)
         self.action_buf = []
         self.reset_target_pose(env_ids) # set reset_goal_buf to 0 
@@ -647,6 +743,7 @@ def compute_supgrasp_reward(
     fall_penalty: float,
     max_consecutive_successes: int,
     av_factor: float,
+    test,
 ):
  
     # goal_hand_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
@@ -720,7 +817,9 @@ def compute_supgrasp_reward(
     out_of_box = (object_pos < lower_bound).sum(1) + (object_pos > upper_bound).sum(1)
     # resets = torch.where(object_pos[:,2] <0.025, torch.ones_like(resets), resets)
     # reward = torch.where(object_pos[:,2] <0.025, reward -1, reward) # object fall reward
-    resets = torch.where(out_of_box !=0 , torch.ones_like(resets), resets)
+    if not test:
+        resets = torch.where(out_of_box !=0 , torch.ones_like(resets), resets)
+    
     # print(reward.detach().cpu())
     # Reset goal also
     goal_resets = resets
@@ -986,3 +1085,11 @@ def compute_obj_reward(
         
     return reward, resets, goal_resets, progress_buf, successes, cons_successes
 
+@torch.jit.script
+def scale(x, lower, upper):
+    return (0.5 * (x + 1.0) * (upper - lower) + lower)
+
+
+@torch.jit.script
+def unscale(x, lower, upper):
+    return (2.0 * x - upper - lower) / (upper - lower)
