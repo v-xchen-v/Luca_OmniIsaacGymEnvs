@@ -442,7 +442,6 @@ class HorizontalGraspBasicTask(RLTask):
     def pre_physics_step(self, actions):
         if not self.world.is_playing():
             return
-        print(self._env.recording)
         env_ids = self.reset_buf.nonzero(as_tuple=False).squeeze(-1)
         goal_env_ids = self.reset_goal_buf.nonzero(as_tuple=False).squeeze(-1)
 

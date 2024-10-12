@@ -59,8 +59,8 @@ recording_length: 200
 # fps for writing recorded video
 recording_fps: 30
 # directory to save recordings in
-recording_dir: '/mnt/zl_dev/Render_1011'
-trajectory_dir: '/mnt/zl_dev/traj_1011'
+recording_dir: '/mnt/zl_dev/Render_1012'
+trajectory_dir: '/mnt/zl_dev/traj_1012'
 enable_trajectory_recording: True
 
 wandb_activate: False

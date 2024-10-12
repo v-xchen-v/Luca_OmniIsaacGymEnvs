@@ -394,21 +394,22 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus
         # grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus + action_penalty_scale * action_penalty
         reward = torch.where(hold_flag != hold_value, init_reward, grasp_reward)
-        self.hand_dof_pos_buf.append(self.hand_dof_pos)
-        self.hand_dof_velocities_buf.append(self.hand_dof_velocities)
-        self.action_buf.append(self.actions)
-        self.cur_targets_buf.append(self.cur_targets)
-        self.right_hand_base_pose_buf.append(torch.concatenate([self.right_hand_pos,self.right_hand_rot],dim=1))
-        self.right_hand_palm_pose_buf.append(torch.concatenate([self.right_hand_palm_pos,self.right_hand_palm_rot],dim=1))
-        self.object_pose_buf.append(torch.concatenate([self.object_pos,self.object_rot],dim=1))
+        self.hand_dof_pos_buf.append(self.hand_dof_pos.clone())
+        self.hand_dof_velocities_buf.append(self.hand_dof_velocities.clone())
+        self.action_buf.append(self.actions.clone())
+        self.cur_targets_buf.append(self.cur_targets.clone())
+        # print(self.cur_targets[0,:3])
+        self.right_hand_base_pose_buf.append(torch.concatenate([self.right_hand_pos,self.right_hand_rot],dim=1).clone())
+        self.right_hand_palm_pose_buf.append(torch.concatenate([self.right_hand_palm_pos,self.right_hand_palm_rot],dim=1).clone())
+        self.object_pose_buf.append(torch.concatenate([self.object_pos,self.object_rot],dim=1).clone())
         self.goal_pos
         self.hand_dof_default_pos
         self.hand_start_translation
         self.hand_start_orientation
-        self.obj_to_goal_dist_buf.append(self.goal_pos - self.object_pos)
-        self.hold_flag_buf.append(hold_flag)
-        self.lowest_buf.append(lowest)
-        self.goal_reach_buf.append(goal_dist <= max_goal_dist)
+        self.obj_to_goal_dist_buf.append((self.goal_pos - self.object_pos).clone())
+        self.hold_flag_buf.append(hold_flag.clone())
+        self.lowest_buf.append(lowest.clone())
+        self.goal_reach_buf.append((goal_dist <= max_goal_dist).clone())
 
 
     def compute_full_observations(self, no_vel=False):

@@ -78,7 +78,7 @@ position and orientation of **R_hand_base_link** in each environment's coordiant
 position and orientation of **palm contact point** in each environment's coordiantes, which only has position shift from **R_hand_base_link**. Position: xyz, orientation: quaternion(wxyz), concat to 7d vector, shape: [200, 1, 7].
 
 ### hold_flag_buf 
-Flag indicating whether hand is holding target object, shape: [200, 1].
+Flag indicating whether hand is holding target object, value in [0, 1, 2]. Only hold_flag == 2 will trigger lifting action and reward shape: [200, 1].
 
 ```python
 hold_flag = (right_hand_finger_dist <= max_finger_dist).int() + (right_hand_dist <= max_hand_dist).int()
@@ -88,7 +88,7 @@ right_hand_finger_dist: sum of five fingertip contact points to object point clo
 
 right_hand_dist: palm contact points to object point cloud distance.
 
-**Note**: max_finger_dist and max_hand_dist are copied from shadowhand pipeline without further change, thus **hold_flag == True** doesn't guarantee a firm grasp.
+**Note**: max_finger_dist and max_hand_dist are copied from shadowhand pipeline without further change, thus **hold_flag == 2** doesn't guarantee a firm grasp.
 
 ### lowest_buf 
 lowest point of object point cloud, indicating whether object is still on the ground, shape: [200, 1].
