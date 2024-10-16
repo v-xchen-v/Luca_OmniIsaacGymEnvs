@@ -41,7 +41,8 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
             # self._num_observations = 54 # 42
             # self._num_observations = 110 #  xyz
             # self._num_observations = 119 # xyz rpy
-            self._num_observations = 134 # xyz rpy full joint states
+            # self._num_observations = 134 # bottle
+            self._num_observations = 188 # xyz rpy full joint states
         # 12: inspire hand joints position (action space)
         # 12: inspire hand joints velocity
         # 3: object position
@@ -80,6 +81,7 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
             "R_movable_rot1":18,
             "R_movable_rot2":19
         }
+        self.fingertip_indices = torch.tensor([2, 4, 6, 8, 12]).to(self.cfg['sim_device'])
 
         
         HorizontalGraspBasicTask.__init__(self, name=name, env=env)
@@ -157,7 +159,9 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         self.table_start_translation = torch.tensor([0.01, 0.01, 0.], device=self.device)
     
         # self.object_start_translation = torch.tensor([0.05, -0.10, 0.04], device=self.device) # for static grasping
-        self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device) # for training
+        # self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device) # for fixed init position
+        # self.object_start_translation = torch.tensor([0.14, -0.23, 0.04], device=self.device) # for random init position
+        self.object_start_translation = torch.tensor([0.14, -0.23, 0.075], device=self.device) # for random init position
         self.object_start_orientation = torch.tensor([0.7071, -0.7071, 0., 0], device=self.device) # vertical to hand init pose
 
            
@@ -223,10 +227,13 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
 
         self.hand_dof_pos = self._hands.get_joint_positions()
         self.hand_dof_velocities = self._hands.get_joint_velocities()
-
+        self.hand_dof_force = self._hands.get_measured_joint_efforts()
         self.link_pose = self._hands.fingers.get_world_poses()
         self.link_vel = self._hands.fingers.get_velocities()
         self.link_vel = self.link_vel.view(self.num_envs,-1, 6)# vel : linear + angular
+        self.fingertip_vel = self.link_vel[:,self.fingertip_indices,:] # linear + angular
+        
+
         self.link_pos = self.link_pose[0].view(self.num_envs,-1, 3) - self._env_pos.unsqueeze(1)
         self.link_rot = self.link_pose[1].view(self.num_envs,-1, 4)
         
@@ -336,6 +343,7 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         ]
 
         self.point_cloud_prim.GetDisplayColorAttr().Set([Gf.Vec3f(*color) for color in isaacsim_colors])
+        
         self.compute_full_observations()
         if self.trajectory_recording:
             
@@ -432,6 +440,9 @@ class HorizontalGraspTask(HorizontalGraspBasicTask):
         self.obs_buf[:, 97:102] = self.right_hand_finger_pc_dist_individual
         self.obs_buf[:, 102:131] = time_encode
         self.obs_buf[:, 131:134] = self.goal_pos - self.object_pos
+        self.obs_buf[:, 134:152] = self.hand_dof_force
+        self.obs_buf[:, 152:182] = self.fingertip_vel.view(self.num_envs,-1) # finger distal link linear + angular vel
+        self.obs_buf[:, 182:188] = self.object_velocities # linear + angular
 
         
         

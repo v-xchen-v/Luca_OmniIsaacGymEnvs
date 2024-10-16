@@ -142,7 +142,8 @@ class HorizontalGraspBasicTask(RLTask):
         self.goal_start_orientation = torch.tensor([1.0, 0.0, 0.0, 0.0], device=self.device)
 
         self.get_object(self.hand_start_translation, self.pose_dy, self.pose_dz)
-        self.object_init_pc = np.load('/home/wenbo/Obj_Asset/pc/Bottle/coacd/pc_fps1024_008.npy',allow_pickle=True)
+        # self.object_init_pc = np.load('/home/wenbo/Obj_Asset/pc/Bottle/coacd/pc_fps1024_008.npy',allow_pickle=True)
+        self.object_init_pc = np.load('/home/wenbo/Obj_Asset/coke_can/coke_can.npy',allow_pickle=True)
         # self.object_init_pc = np.load('/home/wenbo/Car/pc_fps1024_008.npy',allow_pickle=True)
         theta = torch.tensor(torch.pi / 2)  # change rotation representation to usd format
 
@@ -152,8 +153,8 @@ class HorizontalGraspBasicTask(RLTask):
             [0, torch.sin(theta), torch.cos(theta)]
         ]).float()
         self.object_init_pc = torch.tensor(self.object_init_pc).float()
-        self.object_init_pc *= 0.8 # object scale
-        self.object_init_pc = torch.matmul(self.object_init_pc, object_pc_init_rotation_matrix.T)
+        self.object_init_pc *= 1.0 # Bottle 0.8
+        # self.object_init_pc = torch.matmul(self.object_init_pc, object_pc_init_rotation_matrix.T) # rot for bottle pc
         self.object_init_pc = self.object_init_pc.to(self._device).unsqueeze(0).repeat([self.num_envs, 1, 1])
         # self.object_init_pc = torch.tensor(self.object_init_pc, device=self._device).float().unsqueeze(0).repeat([self.num_envs, 1, 1])
         
@@ -168,11 +169,13 @@ class HorizontalGraspBasicTask(RLTask):
         self._hands = self.get_hand_view(scene)
         scene.add(self._hands)
         self._objects = RigidPrimView(
-            prim_paths_expr="/World/envs/env_.*/object/object",
+            prim_paths_expr="/World/envs/env_.*/object/object", # bottle & car
+            # prim_paths_expr="/World/envs/env_.*/object", # coke_can
             name="object_view",
             reset_xform_properties=False,
             # masses=torch.tensor([0.07087] * self._num_envs, device=self.device),
-            masses=torch.tensor([0.10] * self._num_envs, device=self.device),
+            # masses=torch.tensor([0.10] * self._num_envs, device=self.device), # bottle
+            masses=torch.tensor([0.39] * self._num_envs, device=self.device), # coke_can
         )
         scene.add(self._objects)
         # self._objects._non_root_link = True
@@ -252,7 +255,8 @@ class HorizontalGraspBasicTask(RLTask):
 
     def get_object(self, hand_start_translation, pose_dy, pose_dz):
         # self.object_usd_path = f"{self._assets_root_path}/Isaac/Props/Blocks/block_instanceable.usd"
-        self.object_usd_path = f"/home/wenbo/Obj_Asset/Bottle_col.usd"
+        # self.object_usd_path = f"/home/wenbo/Obj_Asset/Bottle_col.usd"
+        self.object_usd_path = f"/home/wenbo/Obj_Asset/coke_can/coke_can_col.usd"
         # self.object_usd_path = f"/home/wenbo/Car/Car_col.usd"
         add_reference_to_stage(self.object_usd_path, self.default_zero_env_path + "/object")
         self.obj = XFormPrim(
@@ -263,8 +267,8 @@ class HorizontalGraspBasicTask(RLTask):
             # translation= self.table_start_translation + torch.tensor([0.,0.,0.7]).cuda(),
             orientation=self.object_start_orientation,
             # scale=self.object_scale,
-            scale=self.object_scale * 0.8,
-            # scale=self.object_scale * 1.0,
+            # scale=self.object_scale * 0.8, # bottle
+            scale=self.object_scale * 1.0,
         )
         self._sim_config.apply_articulation_settings(
             "object", get_prim_at_path(self.obj.prim_path), self._sim_config.parse_actor_config("object")
@@ -303,7 +307,6 @@ class HorizontalGraspBasicTask(RLTask):
         )
 
     def post_reset(self):
-
         
         self.num_hand_dofs = self._hands.num_dof
         self.hand_dof_default_pos = torch.zeros(self.num_hand_dofs, dtype=torch.float, device=self.device)
@@ -361,6 +364,24 @@ class HorizontalGraspBasicTask(RLTask):
             self.reset_record_buf()
         
         self.reset_idx(indices)
+        
+        self.prev_targets = self.cur_targets
+        dof_limits = self._hands._physics_view.get_dof_limits()
+        max_forces = self._hands._physics_view.get_dof_max_forces()
+        dof_limits[:,-2:,0] = 0.
+        dof_limits[:,-2:,1] = 1.7
+        max_forces[:,6:10] = 0.1
+        max_forces[:,15:] = 100000  # 
+        # masses = self._hands._physics_view.get_masses()
+        # masses[:,:7] = 0.001
+        # self._hands._physics_view.set_masses(masses,indices = indices.detach().cpu())
+        self._hands._physics_view.set_dof_max_forces(max_forces,indices = indices.detach().cpu())
+        self._hands._physics_view.set_dof_limits(dof_limits,indices = indices.detach().cpu())
+        # max_vel = self._hands._physics_view.get_dof_max_velocities()
+        # max_vel[0,-3:] = 174.53
+        # max_vel[0,-3:]*=5
+        # self._hands._physics_view.set_dof_max_velocities(max_vel,indices = indices.detach().cpu())
+        
 
         if self._dr_randomizer.randomize:
             self._dr_randomizer.set_up_domain_randomization(self)
@@ -417,7 +438,8 @@ class HorizontalGraspBasicTask(RLTask):
             self.fall_penalty,
             self.max_consecutive_successes,
             self.av_factor,
-            torch.tensor(self.test)
+            torch.tensor(self.test),
+            self.hand_dof_upper_limits
         )
 
         self.extras["consecutive_successes"] = self.consecutive_successes.mean()
@@ -484,7 +506,7 @@ class HorizontalGraspBasicTask(RLTask):
         #     self.action_buf = torch.stack(self.action_buf).squeeze(1)
         #     np.save('/home/wenbo/action_buf_example_control.npy',self.action_buf.detach().cpu().numpy())
         
-        # # previous
+        # previous
         self.actions = actions.clone().to(self.device)
         joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
         hand_dof = self.hand_dof_pos
@@ -492,16 +514,16 @@ class HorizontalGraspBasicTask(RLTask):
         
         lower_limit = torch.tensor([-1, -1, -0.14]).cuda()
         upper_limit = torch.tensor([1, 1, 1]).cuda()
-        
+        # print(self._hands.get_measured_joint_efforts()[0,self.finger_dof_indices])
         # target_hand_dof[:,:3] += actions[:,:3] * 0.05
         # target_hand_dof[:,:3] += actions[:,:3] * 0.33
-        target_hand_dof[:,:3] += actions[:,:3] * 0.05 # 0.05
+        target_hand_dof[:,:3] += actions[:,:3] * 0.025 # 0.05 # 0.015 # nn_1011: 0.025/0.25
         target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # rotation set to default pose
-        target_hand_dof[:,6:10] += actions[:,6:10]* 0.5 # 0.5
-        target_hand_dof[:,10:12] += actions[:,10:12]* 0.5 # 0.5
+        target_hand_dof[:,6:10] += actions[:,6:10]* 0.25 # 0.5 # 0.15
+        target_hand_dof[:,10:12] += actions[:,10:12]* 0.25 # 0.5 # 0.15
         # target_hand_dof[:,6:10] += actions[:,6:10] #slower move for other 4 fingers
         # target_hand_dof[:,10:12] += actions[:,10:12] #faster move for thumb
-        self.cur_targets[:, joint_indices] = 0.2 * target_hand_dof + 0.8 * self.prev_targets[:, joint_indices] # smoothing
+        self.cur_targets[:, joint_indices] = 1.0 * target_hand_dof + 0. * self.prev_targets[:, joint_indices] # 0.2 / 0.8
         self.cur_targets[:,self.base_trans_dof_indices] = torch.clamp(self.cur_targets[:,self.base_trans_dof_indices], lower_limit, upper_limit) # base action clamp
         self.cur_targets[:,self.base_rot_dof_indices] = torch.clamp(self.cur_targets[:,self.base_rot_dof_indices], self.hand_dof_lower_limits[self.base_rot_dof_indices], self.hand_dof_upper_limits[self.base_rot_dof_indices])
         self.cur_targets[:,self.finger_dof_indices] = torch.clamp(self.cur_targets[:,self.finger_dof_indices], 
@@ -549,15 +571,20 @@ class HorizontalGraspBasicTask(RLTask):
         
         # self.actions = actions.clone().to(self.device)
         # joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
-        # hand_dof = self.hand_dof_pos
+        # hand_dof = self.hand_dof_pos.clone()
+        # hand_dof[:,:] = self.hand_dof_default_pos
         # target_hand_dof = hand_dof[:, joint_indices]
         # lower_limit = torch.tensor([-1, -1, -1]).cuda()
         # upper_limit = torch.tensor([1, 1, 1]).cuda()
      
-        # print(self._hands.get_measured_joint_efforts())
+        # # print(self._hands.get_measured_joint_efforts())
         # np.array(self._hands._dof_names)[joint_indices]
         # if self.progress_buf[0] <60:
         #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        #     # target_hand_dof[:,-2] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[10]
+        #     target_hand_dof[:,-2] = 1.3
+        #     target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
+            
   
         # else:
         #     target_hand_dof[:, 6:] += 60* 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
@@ -567,6 +594,10 @@ class HorizontalGraspBasicTask(RLTask):
         #                                     self.hand_dof_lower_limits[self.finger_dof_indices], 
         #                                     self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) 
         # self._hands.set_joint_position_targets(target_hand_dof,joint_indices = joint_indices) # direct position control, wo smoothing
+        # print(self.hand_dof_pos[0,-3:])
+        # finger_dif = self.hand_dof_pos[0,self.finger_dof_indices] - target_hand_dof[0, 6:]
+        # print(f'Diff:  {finger_dif}')
+        # print(target_hand_dof[0,3:6])
             
 
     def is_done(self):
@@ -626,12 +657,16 @@ class HorizontalGraspBasicTask(RLTask):
         self.hold_flag_buf = torch.stack(self.hold_flag_buf).detach().cpu()
         self.lowest_buf = torch.stack(self.lowest_buf).detach().cpu()
         self.goal_reach_buf = torch.stack(self.goal_reach_buf).detach().cpu()
+        self.object_pose_buf = torch.stack(self.object_pose_buf).detach().cpu()
+        self.obj_to_goal_dist_buf = torch.stack(self.obj_to_goal_dist_buf).detach().cpu()
         self.record_buf['hand_dof_pos_buf'] = self.hand_dof_pos_buf # [200, 1, 18]
         self.record_buf['hand_dof_velocities_buf'] = self.hand_dof_velocities_buf # [200, 1, 18]
         self.record_buf['action_buf'] = self.action_buf# [200, 1, 12] 
         self.record_buf['cur_targets_buf'] = self.cur_targets_buf# [200, 1, 18]
         self.record_buf['right_hand_base_pose_buf'] = self.right_hand_base_pose_buf# [200, 1, 7]
         self.record_buf['right_hand_palm_pose_buf'] = self.right_hand_palm_pose_buf# [200, 1, 7]
+        self.record_buf['object_pose_buf'] = self.object_pose_buf
+        self.record_buf['obj_to_goal_dist_buf'] = self.obj_to_goal_dist_buf
         self.record_buf['hold_flag_buf'] = self.hold_flag_buf# [200, 1]
         self.record_buf['lowest_buf'] = self.lowest_buf# [200, 1]
         self.record_buf['goal_reach_buf'] = self.goal_reach_buf# [200, 1]
@@ -645,7 +680,7 @@ class HorizontalGraspBasicTask(RLTask):
             if self._env.video_recorder is not None:
                 # self.video_path = os.path.join(self._cfg['recording_dir'], f"{self.record_traj_id:04d}.mp4")
                 # self.trajectory_path = os.path.join(self.trajectory_dir,f"{self.record_traj_id:04d}.npy")
-                self.trajectory_path = os.path.join(self.trajectory_dir,f"step-{self.record_traj_id*200}.npy")
+                self.trajectory_path = os.path.join(self.trajectory_dir,f"step-{self.record_traj_id*600}.npy")
                 self.gather_record_buf()
                 np.save(self.trajectory_path, self.record_buf)
                 self.reset_record_buf()
@@ -663,8 +698,12 @@ class HorizontalGraspBasicTask(RLTask):
         # new_object_rot = randomize_rotation(
         #     rand_floats[:, 3], rand_floats[:, 4], self.x_unit_tensor[env_ids], self.y_unit_tensor[env_ids]
         # )
+        rand_floats_trans = torch_rand_float(-1.0, 1.0, (len(env_ids), 3), device=self.device) *0.05
+        rand_floats_trans[:,2] = 0
+        
         new_object_rot = self.object_start_orientation.unsqueeze(0).repeat([len(env_ids),1])
-        new_object_pos = self.object_start_translation.unsqueeze(0).repeat([len(env_ids),1]) + self._env_pos[env_ids]
+        # new_object_pos = self.object_start_translation.unsqueeze(0).repeat([len(env_ids),1]) + self._env_pos[env_ids] # fixed init pos
+        new_object_pos = self.object_start_translation.unsqueeze(0).repeat([len(env_ids),1]) + rand_floats_trans+  self._env_pos[env_ids] # random init pos
         object_velocities = torch.zeros_like(self.object_init_velocities, dtype=torch.float, device=self.device)
         self._objects.set_velocities(object_velocities[env_ids], indices)
         self._objects.set_world_poses(new_object_pos, new_object_rot, indices)
@@ -743,6 +782,7 @@ def compute_supgrasp_reward(
     max_consecutive_successes: int,
     av_factor: float,
     test,
+    hand_dof_upper_limits
 ):
  
     # goal_hand_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
@@ -811,13 +851,15 @@ def compute_supgrasp_reward(
     
     # lower_bound = torch.tensor([-0.42, -0.65, 0.025]).cuda()
     # upper_bound = torch.tensor([0.58, 0.35, 1.0]).cuda()
-    lower_bound = torch.tensor([-0.39, -0.68, 0.025]).cuda()
+    # lower_bound = torch.tensor([-0.39, -0.68, 0.025]).cuda() # bottle
+    lower_bound = torch.tensor([-0.39, -0.68, 0.035]).cuda()
     upper_bound = torch.tensor([0.61, 0.32, 1.0]).cuda()
     out_of_box = (object_pos < lower_bound).sum(1) + (object_pos > upper_bound).sum(1)
     # resets = torch.where(object_pos[:,2] <0.025, torch.ones_like(resets), resets)
     # reward = torch.where(object_pos[:,2] <0.025, reward -1, reward) # object fall reward
     if not test:
         resets = torch.where(out_of_box !=0 , torch.ones_like(resets), resets)
+        reward = torch.where(out_of_box !=0, reward -1, reward) # object fall reward
     
     # print(reward.detach().cpu())
     # Reset goal also
@@ -871,218 +913,6 @@ def compute_supgrasp_reward(
     
     return reward, resets, goal_resets, progress_buf, successes, cons_successes
 
-
-# @torch.jit.script
-def compute_obj_reward(
-    rew_buf,
-    reset_buf,
-    reset_goal_buf,
-    progress_buf,
-    successes,
-    consecutive_successes,
-    max_episode_length: float,
-    weights,
-    # hand_obj_dist,
-    # hand_obj_dist_xy,
-    object_pos,
-    object_rot,
-    goal_pos,
-    goal_rot, # 
-    # hand_dof_pos,
-    # hand_dof_pregrasp_pos,
-    # right_hand_pos,
-    right_hand_palm_pos,
-    right_hand_pc_dist,
-    right_hand_finger_pc_dist,
-    object_points,
-    dist_reward_scale: float,
-    rot_reward_scale: float,
-    rot_eps: float,
-    actions,
-    action_penalty_scale: float,
-    success_tolerance: float,
-    reach_goal_bonus: float,
-    fall_dist: float,
-    fall_penalty: float,
-    max_consecutive_successes: int,
-    av_factor: float,
-):
-    # exp_type = 'single_reward_approaching'
-    # exp_type = 'double_reward_approaching'
-    # exp_type = 'double_reward_approaching_lift'
-    # exp_type = 'single_reward_approaching_lift'
-    exp_type = 'unidexgrasp'
-    
-    if exp_type == 'single_reward_approaching':
-        # goal_hand_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(goal_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(object_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = right_hand_pc_dist # palm to object
-        goal_hand_dist = right_hand_finger_pc_dist /5
-        goal_distance = 0.04
-        reward = -1 * goal_hand_dist
-        reward = torch.where(goal_hand_dist < goal_distance, reward +20, reward)
-        goal_resets = torch.where(goal_hand_dist < goal_distance, torch.ones_like(reset_goal_buf), reset_goal_buf)
-        successes = successes + goal_resets
-        resets = goal_resets # *
-        # print('palm \n')
-        # print(right_hand_pc_dist)
-        print(reward)
-
-        if max_consecutive_successes > 0:
-            # Reset progress buffer on goal envs if max_consecutive_successes > 0
-            progress_buf = torch.where(
-                goal_hand_dist < 0.02, torch.zeros_like(progress_buf), progress_buf
-            )
-            resets = torch.where(successes >= max_consecutive_successes, torch.ones_like(resets), resets)
-        resets = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(resets), resets)
-
-        num_resets = torch.sum(resets)
-        finished_cons_successes = torch.sum(successes * resets.float())
-
-        cons_successes = torch.where(
-            num_resets > 0,
-            av_factor * finished_cons_successes / num_resets + (1.0 - av_factor) * consecutive_successes,
-            consecutive_successes,
-        )
-    elif exp_type == 'double_reward_approaching':
-        # goal_hand_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(goal_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(object_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = right_hand_pc_dist # palm to object
-        # goal_hand_dist = right_hand_finger_pc_dist /5
-        lowest = torch.min(object_points[:, :, -1], dim=1)[0]
-        goal_distance = 0.04
-        reward = -1 * right_hand_pc_dist -  1 * right_hand_finger_pc_dist
-        palm_hold = right_hand_pc_dist < goal_distance
-        finger_hold = right_hand_finger_pc_dist / 5 < goal_distance
-        hold_flag = palm_hold *1 + finger_hold*1
-        
-        reward = torch.where(hold_flag == 2, reward +20, reward)
-        goal_resets = torch.where(hold_flag == 2, torch.ones_like(reset_goal_buf), reset_goal_buf)
-        successes = successes + goal_resets
-        resets = goal_resets # *
-        # print('palm \n')
-        # print(right_hand_pc_dist)
-        print(reward)
-
-        if max_consecutive_successes > 0:
-            # Reset progress buffer on goal envs if max_consecutive_successes > 0
-            progress_buf = torch.where(
-                hold_flag == 2, torch.zeros_like(progress_buf), progress_buf
-            )
-            resets = torch.where(successes >= max_consecutive_successes, torch.ones_like(resets), resets)
-        resets = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(resets), resets)
-
-        num_resets = torch.sum(resets)
-        finished_cons_successes = torch.sum(successes * resets.float())
-
-        cons_successes = torch.where(
-            num_resets > 0,
-            av_factor * finished_cons_successes / num_resets + (1.0 - av_factor) * consecutive_successes,
-            consecutive_successes,
-        )
-        
-    elif exp_type == 'double_reward_approaching_lift':
-        # goal_hand_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(goal_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(object_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = right_hand_pc_dist # palm to object
-        # goal_hand_dist = right_hand_finger_pc_dist /5
-        lowest = torch.min(object_points[:, :, -1], dim=1)[0]
-        goal_distance = 0.045
-        reward = -1 * right_hand_pc_dist -  1 * right_hand_finger_pc_dist
-        palm_hold = right_hand_pc_dist < goal_distance 
-        finger_hold = right_hand_finger_pc_dist / 5 < goal_distance -0.01
-        hold_flag = palm_hold *1 + finger_hold*1
-        
-        # reward = torch.where(hold_flag == 2, reward +20, reward)
-        reward = torch.where(hold_flag == 2, reward +10, reward)
-        
-        
-        lift_rew = lowest - 0.1
-        reward = torch.where(hold_flag == 2, reward + 10* lift_rew, reward)
-        
-        goal_standard = (hold_flag == 2) & (lowest >= 0.1)
-        reward = torch.where(goal_standard == 1, reward +20, reward)
-        
-        goal_resets = torch.where(goal_standard == 1, torch.ones_like(reset_goal_buf), reset_goal_buf)
-        
-        successes = successes + goal_resets
-        resets = goal_resets # *
-        # print('palm \n')
-        # print(right_hand_pc_dist)
-        print(reward)
-    
-        if max_consecutive_successes > 0:
-            # Reset progress buffer on goal envs if max_consecutive_successes > 0
-            progress_buf = torch.where(
-                goal_standard == 1, torch.zeros_like(progress_buf), progress_buf
-            )
-            resets = torch.where(successes >= max_consecutive_successes, torch.ones_like(resets), resets)
-        resets = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(resets), resets)
-
-        num_resets = torch.sum(resets)
-        finished_cons_successes = torch.sum(successes * resets.float())
-
-        cons_successes = torch.where(
-            num_resets > 0,
-            av_factor * finished_cons_successes / num_resets + (1.0 - av_factor) * consecutive_successes,
-            consecutive_successes,
-        )
-
-    elif exp_type == 'single_reward_approaching_lift':
-        # goal_hand_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(goal_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = torch.norm(object_pos - right_hand_palm_pos, p=2, dim=-1) # zl *
-        # goal_hand_dist = right_hand_pc_dist # palm to object
-        # goal_hand_dist = right_hand_finger_pc_dist /5
-        lowest = torch.min(object_points[:, :, -1], dim=1)[0]
-        goal_distance = 0.045
-        reward = -1 * right_hand_pc_dist - 1 * right_hand_finger_pc_dist
-        palm_hold = right_hand_pc_dist < goal_distance 
-        finger_hold = (right_hand_finger_pc_dist / 5) < (goal_distance -0.015)
-        hold_flag = palm_hold *1 + finger_hold*1
-        
-        # reward = torch.where(hold_flag == 2, reward +20, reward)
-        reward = torch.where(hold_flag == 2, reward +10, reward)
-        
-        
-        lift_rew = lowest - 0.1
-        reward = torch.where(hold_flag == 2, reward + 10* lift_rew, reward)
-        hand_up = torch.zeros_like(reward)
-        hand_up = torch.where(lowest >= 0.0, torch.where(hold_flag == 2, 0.1 + 1.0 * actions[:, 0], hand_up), hand_up) # zl +x of action is world + z
-        reward += hand_up
-        
-        goal_standard = (hold_flag == 2) & (lowest >= 0.1)
-        reward = torch.where(goal_standard == 1, reward +20, reward)
-        
-        goal_resets = torch.where(goal_standard == 1, torch.ones_like(reset_goal_buf), reset_goal_buf)
-        
-        successes = successes + goal_resets
-        resets = goal_resets # *
-        # print('palm \n')
-        # print(right_hand_pc_dist)
-        print(reward)
-    
-        if max_consecutive_successes > 0:
-            # Reset progress buffer on goal envs if max_consecutive_successes > 0
-            progress_buf = torch.where(
-                goal_standard == 1, torch.zeros_like(progress_buf), progress_buf
-            )
-            resets = torch.where(successes >= max_consecutive_successes, torch.ones_like(resets), resets)
-        resets = torch.where(progress_buf >= max_episode_length - 1, torch.ones_like(resets), resets)
-
-        num_resets = torch.sum(resets)
-        finished_cons_successes = torch.sum(successes * resets.float())
-
-        cons_successes = torch.where(
-            num_resets > 0,
-            av_factor * finished_cons_successes / num_resets + (1.0 - av_factor) * consecutive_successes,
-            consecutive_successes,
-        )
-        
-    return reward, resets, goal_resets, progress_buf, successes, cons_successes
 
 @torch.jit.script
 def scale(x, lower, upper):

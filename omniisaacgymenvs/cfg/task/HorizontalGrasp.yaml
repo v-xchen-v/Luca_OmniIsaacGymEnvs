@@ -8,7 +8,7 @@ physics_engine: ${..physics_engine}
 env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 2.0
-  episodeLength: 200
+  episodeLength: 600 # 200
 
   clipObservations: 5.0
   clipActions: 1.0
@@ -117,13 +117,13 @@ sim:
     enable_gyroscopic_forces: False
     # also in stage params
     # per-actor
-    solver_position_iteration_count: 8
-    solver_velocity_iteration_count: 0
+    solver_position_iteration_count: 8 # 8
+    solver_velocity_iteration_count: 0 # 0
     sleep_threshold: 0.005
     stabilization_threshold: 0.0005
     # per-body
     density: -1
-    max_depenetration_velocity: 1000.0
+    max_depenetration_velocity: 10.0
   object:
     # -1 to use default values
     override_usd_defaults: False
@@ -132,14 +132,14 @@ sim:
     enable_gyroscopic_forces: True
     # also in stage params
     # per-actor
-    solver_position_iteration_count: 8
-    solver_velocity_iteration_count: 0
+    solver_position_iteration_count: 8 # 8
+    solver_velocity_iteration_count: 0 # 0
     sleep_threshold: 0.005
     stabilization_threshold: 0.0025
     # per-body
     # density: 400.0
     density: 4000.0
-    max_depenetration_velocity: 1000.0
+    max_depenetration_velocity: 10.0
   goal_object:
     # -1 to use default values
     override_usd_defaults: False

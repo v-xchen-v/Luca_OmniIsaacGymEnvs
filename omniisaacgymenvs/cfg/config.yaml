@@ -51,16 +51,18 @@ mt_timeout: 300
 # enable_recording: False
 enable_recording: True
 # interval between video recordings (in steps)
-# recording_interval: 2000
-recording_interval: 200
+recording_interval: 600
+# recording_interval: 600
 # length of the recorded video (in steps)
-# recording_length: 600
-recording_length: 200
+recording_length: 600
+# recording_length: 1200
 # fps for writing recorded video
 recording_fps: 30
 # directory to save recordings in
-recording_dir: '/mnt/zl_dev/Render_1012'
-trajectory_dir: '/mnt/zl_dev/traj_1012'
+# recording_dir: '/mnt/zl_dev/Render_1013_step600_constrained_training'
+# recording_dir: '/mnt/zl_dev/coke_can_s0025_1014_0basemass'
+recording_dir: '/mnt/zl_dev/coke_can_1016'
+trajectory_dir: '/mnt/zl_dev/coke_can_1016'
 enable_trajectory_recording: True
 
 wandb_activate: False
