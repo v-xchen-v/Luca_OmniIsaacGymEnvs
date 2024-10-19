@@ -28,11 +28,12 @@
 
 
 from typing import Optional
-
+import numpy as np
 import torch
 from omni.isaac.core.articulations import ArticulationView
 from omni.isaac.core.prims import RigidPrimView
-
+from omniisaacgymenvs.tasks.utils.usd_utils import set_drive
+from pxr import Gf, PhysxSchema, Sdf, Usd, UsdGeom, UsdPhysics
 
 class MovableInspireRView(ArticulationView):
     def __init__(
@@ -47,6 +48,7 @@ class MovableInspireRView(ArticulationView):
             # prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire_mimic_noflange_movable_totest_2/R_inspire/R*',
             # prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire_mimic_noflange_movable_tested/R_inspire_mimic_noflange_movable_totest_2/R_inspire/R*', # previous
             prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire/R*', # Xi fixed
+            # prim_paths_expr='/World/envs/.*/movable_inspire_R/R_inspire_full_drive/R_inspire/R*', # full drive fixed
             name="finger_view",
             reset_xform_properties=False,
         )
@@ -73,7 +75,30 @@ class MovableInspireRView(ArticulationView):
             "R_thumb_proximal_yaw_joint",
             "R_thumb_proximal_pitch_joint",
         ]
+        
+        # self.actuated_joint_names = [
+        #     "move_x",
+        #     "move_y",
+        #     "move_z",
+        #     "rot_r",
+        #     "rot_p",
+        #     "rot_y",
+        #     "R_index_proximal_joint",
+        #     "R_index_intermediate_joint",
+        #     "R_middle_proximal_joint",
+        #     "R_middle_intermediate_joint",
+        #     "R_pinky_proximal_joint",
+        #     "R_pinky_intermediate_joint",
+        #     "R_ring_proximal_joint",
+        #     "R_ring_intermediate_joint",
+        #     "R_thumb_proximal_yaw_joint",
+        #     "R_thumb_proximal_pitch_joint",
+        #     "R_thumb_intermediate_joint",
+        #     "R_thumb_distal_joint"
+        # ]
+        
         self._actuated_dof_indices = list()
         for joint_name in self.actuated_joint_names:
             self._actuated_dof_indices.append(self.get_dof_index(joint_name))
         self._actuated_dof_indices.sort()
+        

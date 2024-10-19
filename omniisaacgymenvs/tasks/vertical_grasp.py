@@ -158,7 +158,8 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         self.hand_start_orientation = torch.tensor([1., 0., 0., 0.], device=self.device)
         self.table_start_translation = torch.tensor([0.01, 0.01, 0.], device=self.device)
     
-        self.object_start_translation = torch.tensor([0.0, -0.10, 0.02], device=self.device) # for static grasping
+        # self.object_start_translation = torch.tensor([0.0, -0.10, 0.01], device=self.device) # for static grasping
+        self.object_start_translation = torch.tensor([0.01, -0.08, 0.028], device=self.device) # for static grasping
         # self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device) # for fixed init position
         # self.object_start_translation = torch.tensor([0.14, -0.23, 0.04], device=self.device) # for random init position
         # self.object_start_translation = torch.tensor([0.14, -0.23, 0.075], device=self.device) # for random init position

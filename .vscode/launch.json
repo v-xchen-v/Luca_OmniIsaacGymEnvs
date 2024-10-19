@@ -172,7 +172,7 @@
                 "task=VerticalGrasp",
                 "num_envs=1",
                 // "test=True",
-                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/HorizontalGrasp/nn/HorizontalGrasp.pth"
+                // "checkpoint=${userHome}/Documents/repos/Luca_OmniIsaacGymEnvs/omniisaacgymenvs/runs/cube_055_finger_abscontrol_s400_goalrew5/nn/cube_055_finger_abscontrol_s400_goalrew5.pth"
                 // "headless=True" # Warning: DO NOT use headless=True, more refer to https://forums.developer.nvidia.com/t/get-world-poses-do-not-work-when-training-in-headless-true/230937
             ],
             // "justMyCode": false

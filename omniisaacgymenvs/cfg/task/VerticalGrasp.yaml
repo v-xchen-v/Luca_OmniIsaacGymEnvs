@@ -8,7 +8,7 @@ physics_engine: ${..physics_engine}
 env:
   numEnvs: ${resolve_default:8192,${...num_envs}}
   envSpacing: 2.0
-  episodeLength: 600 # 200
+  episodeLength: 200 # 200
 
   clipObservations: 5.0
   clipActions: 1.0
@@ -80,10 +80,12 @@ sim:
   enable_cameras: False
 
   default_material:
-    static_friction: 1.0
-    dynamic_friction: 1.0
+    # static_friction: 1.0
+    # dynamic_friction: 1.0
     # static_friction: 2.0
     # dynamic_friction: 2.0
+    static_friction: 5.0
+    dynamic_friction: 5.0
     # static_friction: 10.0
     # dynamic_friction: 10.0
     restitution: 0.01
@@ -121,8 +123,8 @@ sim:
     solver_position_iteration_count: 64 # 8
     solver_velocity_iteration_count: 0 # 0
     sleep_threshold: 0.005
-    # stabilization_threshold: 0.0005
-    stabilization_threshold: 0.05
+    stabilization_threshold: 0.0005
+    # stabilization_threshold: 0.05
     # per-body
     density: -1
     max_depenetration_velocity: 3.0
