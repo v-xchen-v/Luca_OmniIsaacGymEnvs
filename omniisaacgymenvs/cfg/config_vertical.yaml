@@ -5,8 +5,9 @@ task_name: ${task.name}
 # experiment: 'cube_055_armatures_001_z_limit_002_f5'
 # experiment: 'cube_055_no_palm_reward_new_material'
 # experiment: 'cube_055_less_stiff_s200_velx10'
-experiment: 'cube_055_finger_abscontrol_s400_goalrew5'
-# experiment: 'banana_debug'
+# experiment: 'cube_055_finger_abscontrol_s400_goalrew5'
+# experiment: 'banana_1019'
+experiment: 'orange_1019'
 
 # if set to positive integer, overrides the default number of environments
 num_envs: ''
@@ -66,10 +67,11 @@ recording_fps: 30
 # recording_dir: '/mnt/zl_dev/Render_1013_step600_constrained_training'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_no_palm_reward_new_material'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_less_stiff_s200_velx10'
-recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/banana_debug'
-trajectory_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
-enable_trajectory_recording: True
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/banana_1019'
+recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_1019'
+# trajectory_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
+enable_trajectory_recording: False
 
 wandb_activate: False
 wandb_group: ''
