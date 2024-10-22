@@ -159,13 +159,15 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         self.table_start_translation = torch.tensor([0.01, 0.01, 0.], device=self.device)
     
         # self.object_start_translation = torch.tensor([0.0, -0.10, 0.01], device=self.device) # for static grasping
-        self.object_start_translation = torch.tensor([0.01, -0.08, 0.028], device=self.device) # for static grasping
+        # self.object_start_translation = torch.tensor([0.01, -0.08, 0.028], device=self.device) # for cube and orange
+        # self.object_start_translation = torch.tensor([0.01, -0.08, 0.015], device=self.device) # for banana
+        self.object_start_translation = torch.tensor([0.01, -0.08, 0.047], device=self.device) # for realsense_box
         # self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device) # for fixed init position
         # self.object_start_translation = torch.tensor([0.14, -0.23, 0.04], device=self.device) # for random init position
         # self.object_start_translation = torch.tensor([0.14, -0.23, 0.075], device=self.device) # for random init position
         # self.object_start_orientation = torch.tensor([0.7071, -0.7071, 0., 0], device=self.device) # vertical to hand init pose
-        self.object_start_orientation = torch.tensor([0.7071, 0, 0., -0.7071], device=self.device) # vertical to hand init pose
-        # self.object_start_orientation = torch.tensor([1., 0, 0., 0], device=self.device) # vertical to hand init pose
+        # self.object_start_orientation = torch.tensor([0.7071, 0, 0., -0.7071], device=self.device) # cube and orange
+        self.object_start_orientation = torch.tensor([1., 0, 0., 0], device=self.device) # vertical to hand init pose
 
            
         self.pose_dy, self.pose_dz = 0., 0.
@@ -204,8 +206,8 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         # link_names = []
         # for i in range(20):
         #     link_names.append(self._hands.fingers.prim_paths[i].split('/')[-1])
-        
-
+        # self.update_object_pos_cache(self.object_pos_cache, self.object_pos)
+        self.update_object_pos_static()
         self.object_pose = torch.concat([self.object_pos, self.object_rot], dim=1) # pos in local env
         self.object_pos # have
         self.object_rot # have
@@ -349,7 +351,6 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         # ]
 
         # self.point_cloud_prim.GetDisplayColorAttr().Set([Gf.Vec3f(*color) for color in isaacsim_colors])
-        
         self.compute_full_observations()
         if self.trajectory_recording:
             

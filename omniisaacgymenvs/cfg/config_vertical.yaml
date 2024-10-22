@@ -6,8 +6,11 @@ task_name: ${task.name}
 # experiment: 'cube_055_no_palm_reward_new_material'
 # experiment: 'cube_055_less_stiff_s200_velx10'
 # experiment: 'cube_055_finger_abscontrol_s400_goalrew5'
-# experiment: 'banana_1019'
-experiment: 'orange_1019'
+# experiment: 'banana_1020'
+# experiment: 'debug'
+# experiment: 'realsense_box_1021_rotdof_mass01_pos_change_rew+'
+experiment: 'realsense_box_1021_mass01_pos_change_rew+'
+# experiment: 'orange_1019_pos_change_reward'
 
 # if set to positive integer, overrides the default number of environments
 num_envs: ''
@@ -68,8 +71,12 @@ recording_fps: 30
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_no_palm_reward_new_material'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_less_stiff_s200_velx10'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/banana_1019'
-recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_1019'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/banana_1020'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/debug'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/realsense_box_1021_rotdof_mass01_pos_change_rew+'
+recording_dir: '/mnt/zl_dev/VerticalGrasp/realsense_box_1021_mass01_pos_change_rew+'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_1019_pos_change_reward'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/debug'
 # trajectory_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
 enable_trajectory_recording: False
 

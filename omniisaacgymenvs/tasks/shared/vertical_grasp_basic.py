@@ -144,8 +144,9 @@ class VerticalGraspBasicTask(RLTask):
         self.get_object(self.hand_start_translation, self.pose_dy, self.pose_dz)
         # self.object_init_pc = np.load('/home/wenbo/Obj_Asset/pc/Bottle/coacd/pc_fps1024_008.npy',allow_pickle=True)
         # self.object_init_pc = np.load('/home/wenbo/Obj_Asset/011_banana/banana.npy',allow_pickle=True)
+        self.object_init_pc = np.load('/home/wenbo/Obj_Asset/realsense_box/realsense_box.npy',allow_pickle=True)
         # self.object_init_pc = np.load('/home/wenbo/Obj_Asset/cube_055/cube_055.npy',allow_pickle=True)
-        self.object_init_pc = np.load('/home/wenbo/Obj_Asset/orange/orange.npy',allow_pickle=True)
+        # self.object_init_pc = np.load('/home/wenbo/Obj_Asset/orange/orange.npy',allow_pickle=True)
         # self.object_init_pc = np.load('/home/wenbo/Car/pc_fps1024_008.npy',allow_pickle=True)
         theta = torch.tensor(torch.pi / 2)  # change rotation representation to usd format
 
@@ -178,7 +179,8 @@ class VerticalGraspBasicTask(RLTask):
             # masses=torch.tensor([0.07087] * self._num_envs, device=self.device),
             # masses=torch.tensor([0.10] * self._num_envs, device=self.device), # bottle
             # masses=torch.tensor([0.39] * self._num_envs, device=self.device), # coke_can
-            masses=torch.tensor([0.03] * self._num_envs, device=self.device), # banana
+            masses=torch.tensor([0.1] * self._num_envs, device=self.device), # banana
+            # masses=torch.tensor([1.0] * self._num_envs, device=self.device), # banana
         )
         scene.add(self._objects)
         # self._objects._non_root_link = True
@@ -260,9 +262,10 @@ class VerticalGraspBasicTask(RLTask):
         # self.object_usd_path = f"{self._assets_root_path}/Isaac/Props/Blocks/block_instanceable.usd"
         # self.object_usd_path = f"/home/wenbo/Obj_Asset/Bottle_col.usd"
         # self.object_usd_path = f"/home/wenbo/Obj_Asset/011_banana/Banana_col_material.usd"
+        self.object_usd_path = f"/home/wenbo/Obj_Asset/realsense_box/realsense_box_material.usd"
         # self.object_usd_path = f"/home/wenbo/Obj_Asset/cube_055/cube_055_col.usd"
         # self.object_usd_path = f"/home/wenbo/Obj_Asset/cube_055/cube_055_col_material.usd"
-        self.object_usd_path = f"/home/wenbo/Obj_Asset/orange/orange_material.usd"
+        # self.object_usd_path = f"/home/wenbo/Obj_Asset/orange/orange_material.usd"
         # self.object_usd_path = f"/home/wenbo/Car/Car_col.usd"
         add_reference_to_stage(self.object_usd_path, self.default_zero_env_path + "/object")
         self.obj = XFormPrim(
@@ -324,7 +327,9 @@ class VerticalGraspBasicTask(RLTask):
         shutil.copytree(task_folder,experiment_code_dir+'/tasks', dirs_exist_ok=True)
         self.hand_dof_default_pos = torch.zeros(self.num_hand_dofs, dtype=torch.float, device=self.device)
         # self.hand_dof_default_pos[2] = -0.023 # rule base
-        self.hand_dof_default_pos[2] = +0.05 # 
+        # self.hand_dof_default_pos[2] = +0.05 # cube and orange
+        # self.hand_dof_default_pos[2] = +0.04 # banana
+        self.hand_dof_default_pos[2] = +0.08 # realsense_box
         self.hand_dof_default_pos[4] = -3.1416 / 2
         self.hand_dof_default_pos[5] = -3.1416 / 4 # rule base tilt
         self.hand_dof_default_pos[10] = 1.3
@@ -343,7 +348,8 @@ class VerticalGraspBasicTask(RLTask):
         self.action_buf = []
         dof_limits = self._hands.get_dof_limits()
         self.hand_dof_lower_limits, self.hand_dof_upper_limits = torch.t(dof_limits[0].to(self.device))
-                
+        self.hand_dof_lower_limits[5] = -3.1416 / 3 
+        self.hand_dof_upper_limits[5] = 0
         # self.hand_dof_pregrasp_pos = torch.zeros(self.num_hand_dofs, dtype=torch.float, device=self.device)
         # self.hand_dof_pregrasp_pos[6:10] = torch.pi / 6 # index, middle, pinky, ring
         # self.hand_dof_pregrasp_pos[6:10] = torch.pi / 6 # index, middle, pinky, ring
@@ -377,9 +383,15 @@ class VerticalGraspBasicTask(RLTask):
             self.record_buf = []
             self.record_traj_id = 0
             self.reset_record_buf()
-        
+        self.init_reset = False
         self.reset_idx(indices)
+        self.init_reset = True
         
+        self.get_object_goal_observations()
+        self.object_pos_static = torch.zeros_like(self.object_pos)
+        self.object_pos_cache = torch.zeros_like(self.object_pos).unsqueeze(0).repeat([2,1,1])
+        self.object_pos_cache[0] = self.object_pos.clone()
+        self.object_pos_cache[1] = self.object_pos.clone()
         self.prev_targets = self.cur_targets
         # dof_limits = self._hands._physics_view.get_dof_limits()
         max_forces = self._hands._physics_view.get_dof_max_forces()
@@ -458,6 +470,18 @@ class VerticalGraspBasicTask(RLTask):
         if self._dr_randomizer.randomize:
             self._dr_randomizer.set_up_domain_randomization(self)
 
+    def update_object_pos_static(self):
+        update_flag = self.progress_buf==10 # update at step 10
+        self.object_pos_static[update_flag==True] = self.object_pos[update_flag==True].detach().clone()
+        
+        
+    def update_object_pos_cache(self, object_pos_cache, object_pos):
+        # Move current X[1] (current step) to X[0] (previous step)
+        object_pos_cache[0] = object_pos_cache[1].clone()
+        
+        # Update X[1] with the new data (current step)
+        object_pos_cache[1] = object_pos.clone()
+
     def get_object_goal_observations(self):
         self.object_pos, self.object_rot = self._objects.get_world_poses(clone=False)
         self.object_pos -= self._env_pos
@@ -490,6 +514,8 @@ class VerticalGraspBasicTask(RLTask):
             # self.hand_obj_dist_xy,
             self.object_pos,
             self.object_rot,
+            self.object_pos_cache,
+            self.object_pos_static,
             self.goal_pos,
             self.goal_rot,
             self.hand_dof_pos, # current joint states
@@ -591,7 +617,12 @@ class VerticalGraspBasicTask(RLTask):
 
         target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
         # target_hand_dof[:,:3] += actions[:,:3] * 0.005 # 0.05 # 0.015
-        target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # rotation set to default pose
+        # target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # fix all rot dof
+        target_hand_dof[:,3]  = self.hand_dof_default_pos[3] # fix roll
+        target_hand_dof[:,4]  = self.hand_dof_default_pos[4] # fix pitch
+        target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
+        # target_hand_dof[:,5] += actions[:,5] * 0.1
+        # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
         target_hand_dof[:,6:] = scale(actions[:,6:],self.hand_dof_lower_limits[self.finger_dof_indices],self.hand_dof_upper_limits[self.finger_dof_indices])
         target_hand_dof[:,10] = self.hand_dof_upper_limits[10] # thumb yaw fix
 
@@ -773,7 +804,7 @@ class VerticalGraspBasicTask(RLTask):
         self._objects.set_velocities(object_velocities[env_ids], indices)
         self._objects.set_world_poses(new_object_pos, new_object_rot, indices)
         
-
+  
         hand_velocities = torch.zeros_like(self.hand_init_velocities[env_ids], dtype=torch.float, device=self.device)
         hand_init_pos = self.hand_start_translation.repeat([len(env_ids),1]) + self._env_pos[env_ids]
         hand_init_rot = self.hand_start_orientation.repeat([len(env_ids),1])
@@ -811,7 +842,7 @@ def randomize_rotation(rand0, rand1, x_unit_tensor, y_unit_tensor):
     )
 
 
-@torch.jit.script
+# @torch.jit.script
 def compute_supgrasp_reward(
     rew_buf,
     reset_buf,
@@ -826,6 +857,8 @@ def compute_supgrasp_reward(
     # hand_obj_dist_xy,
     object_pos,
     object_rot,
+    object_pos_cache,
+    object_pos_static,
     goal_pos,
     goal_rot, # 
     hand_dof_pos,
@@ -859,7 +892,8 @@ def compute_supgrasp_reward(
     # max_finger_dist = 0.2 # 0.15
     max_finger_dist = 0.3 
     # max_hand_dist = 0.045
-    max_hand_dist = 0.05
+    max_hand_dist = 0.05 # cube and orange, realsense_box
+    # max_hand_dist = 0.08 # banana
     max_goal_dist = 0.05
     hand_up_goal_dist = 1.0
     
@@ -887,6 +921,16 @@ def compute_supgrasp_reward(
     goal_dist = torch.norm(goal_pos - object_pos, p=2, dim=-1) # zl *
     goal_hand_dist = torch.norm(goal_pos - right_hand_palm_pos, p=2, dim=-1)
     
+    compute_obj_pos_change_flag = progress_buf >10
+    previous_obj_pose = object_pos_static
+    obj_pos_change = torch.norm(previous_obj_pose[:,:2] - object_pos[:,:2],dim=1)
+    obj_pos_change_rew = torch.zeros_like(goal_dist)
+    obj_pos_change_rew = torch.where(lowest < 0.01, -10 * obj_pos_change, obj_pos_change_rew)
+    obj_pos_change_rew*= compute_obj_pos_change_flag
+    # print(object_pos)
+    # if abs(obj_pos_change).max() >10:
+    #     print('123')
+    # print(obj_pos_change_rew)
     hold_value = 2
     hold_flag = (right_hand_finger_dist <= max_finger_dist).int() + (right_hand_dist <= max_hand_dist).int()
     
@@ -896,7 +940,8 @@ def compute_supgrasp_reward(
     goal_rew = torch.where(hold_flag == hold_value, 1.0 * (0.9 - 2.0 * goal_dist), goal_rew)
     # Distance from hand pos to goal target pos
     hand_up = torch.zeros_like(goal_dist)
-    hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 0.1 * actions[:, 2], hand_up), hand_up)
+    # hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 0.1 * actions[:, 2], hand_up), hand_up)
+    hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 1.0 * actions[:, 2], hand_up), hand_up)
     hand_up = torch.where(lowest >= 0.20, torch.where(hold_flag == hold_value, 0.2 - goal_hand_dist * 0 + hand_up_goal_dist * (0.2 - goal_dist), hand_up), hand_up)
     # Already hold the object and Already reach the goal
     bonus = torch.zeros_like(goal_dist)
@@ -905,11 +950,13 @@ def compute_supgrasp_reward(
     
     
     # init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -0.5 * goal_dist
-    init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -5 * goal_dist
+    # init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -5 * goal_dist
+    init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -10 * goal_dist + obj_pos_change_rew
     # init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -0.5 * goal_dist + action_penalty_scale * action_penalty
 
     # grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus
-    grasp_reward = -1.0 * right_hand_finger_dist + 0 * right_hand_dist + -5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus
+    # grasp_reward = -1.0 * right_hand_finger_dist + 0 * right_hand_dist + -5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus
+    grasp_reward = -1.0 * right_hand_finger_dist + 0 * right_hand_dist + -10 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus + obj_pos_change_rew
     # grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus + action_penalty_scale * action_penalty
     reward = torch.where(hold_flag != hold_value, init_reward, grasp_reward)
     # print(action_penalty_scale * action_penalty)
@@ -926,7 +973,8 @@ def compute_supgrasp_reward(
     # upper_bound = torch.tensor([0.58, 0.35, 1.0]).cuda()
     # lower_bound = torch.tensor([-0.39, -0.68, 0.025]).cuda() # bottle
     # lower_bound = torch.tensor([-0.39, -0.68, 0.035]).cuda() Coke_can
-    lower_bound = torch.tensor([-0.5, -0.5, 0.00]).cuda()
+    # lower_bound = torch.tensor([-0.5, -0.5, 0.00]).cuda() # other objects
+    lower_bound = torch.tensor([-0.5, -0.5, 0.035]).cuda() # realsense_box
     upper_bound = torch.tensor([0.5, 0.5, 1.0]).cuda()
     # hand_out_of_box = (object_pos < lower_bound).sum(1) + (object_pos > upper_bound).sum(1) # object
     hand_out_of_box = (right_hand_palm_pos < lower_bound).sum(1) + (right_hand_palm_pos > upper_bound).sum(1) # hand
