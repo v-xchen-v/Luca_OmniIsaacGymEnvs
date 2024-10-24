@@ -161,25 +161,26 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         # self.object_start_translation = torch.tensor([0.0, -0.10, 0.01], device=self.device) # for static grasping
         # self.object_start_translation = torch.tensor([0.01, -0.08, 0.028], device=self.device) # for cube and orange
         # self.object_start_translation = torch.tensor([0.01, -0.08, 0.015], device=self.device) # for banana
-        self.object_start_translation = torch.tensor([0.01, -0.08, 0.047], device=self.device) # for realsense_box
+        # self.object_start_translation = torch.tensor([0.01, -0.08, 0.047], device=self.device) # for realsense_box
         # self.object_start_translation = torch.tensor([0.11, -0.18, 0.04], device=self.device) # for fixed init position
         # self.object_start_translation = torch.tensor([0.14, -0.23, 0.04], device=self.device) # for random init position
         # self.object_start_translation = torch.tensor([0.14, -0.23, 0.075], device=self.device) # for random init position
         # self.object_start_orientation = torch.tensor([0.7071, -0.7071, 0., 0], device=self.device) # vertical to hand init pose
         # self.object_start_orientation = torch.tensor([0.7071, 0, 0., -0.7071], device=self.device) # cube and orange
-        self.object_start_orientation = torch.tensor([1., 0, 0., 0], device=self.device) # vertical to hand init pose
-
+        # self.object_start_orientation = torch.tensor([1., 0, 0., 0], device=self.device) # vertical to hand init pose
+        self.object_start_translation = torch.tensor(self.training_params['object_start_translation'], device=self.device) 
+        self.object_start_orientation = torch.tensor(self.training_params['object_start_orientation'], device=self.device)
            
         self.pose_dy, self.pose_dz = 0., 0.
         self.pose_dx = 0. # object scale 0.9, close to thumb for a little bit    
     #Ref: omniisaacgymenvs/tasks/franka_deformable.py
     def get_hand(self):
         # add a single robot to the stage
+        hand_usd_path = os.path.join(self.asset_path, 'hand', self.hand_usd)
         inpsire_hand = MovableInspireHandR(
             prim_path=self.default_zero_env_path + "/movable_inspire_R", 
             name="movable_inspire_R", 
-            # orientation=torch.tensor([1.0, 0.0, 0.0, 0.0]),
-            # translation=torch.tensor([0.0, 0.0, 0.0]),
+            usd_path=hand_usd_path,
             orientation=self.hand_start_orientation,
             translation=self.hand_start_translation,
         )
@@ -188,9 +189,7 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         self._sim_config.apply_articulation_settings(
             "inspire_hand", get_prim_at_path(inpsire_hand.prim_path), self._sim_config.parse_actor_config("inspire_hand")
         )
-        inpsire_hand.set_inspire_properties(stage=self._stage, shadow_hand_prim=inpsire_hand.prim)
-        # inpsire_hand.set_motor_control_mode(stage=self._stage, shadow_hand_path=inpsire_hand.prim_path)
-        # inpsire_hand.setins(stage=self._stage, prim=inpsire_hand.prim)
+        inpsire_hand.set_inspire_properties(stage=self._stage, inspire_hand_prim=inpsire_hand.prim)
         
     def get_hand_view(self, scene):
         return MovableInspireRView(prim_paths_expr="/World/envs/.*/movable_inspire_R", name="movable_inspire_R_view")
@@ -212,15 +211,6 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         self.object_pos # have
         self.object_rot # have
         
-        new_object_rot = self.object_start_orientation.unsqueeze(0).repeat([self.num_envs,1])
-        new_object_pos = self.object_start_translation.unsqueeze(0).repeat([self.num_envs,1]) + self._env_pos
-        object_velocities = torch.zeros_like(self.object_init_velocities, dtype=torch.float, device=self.device)
-
-        
-        
-        # self.object_points = batch_quat_apply(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
-        # self.object_points = batch_quat_apply(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
-        # self.object_points = batch_quat_apply_wxyz(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
         self.object_points = batch_quat_apply_wxyz(self.object_rot,self.object_init_pc) + self.object_pos.unsqueeze(1)
         self.object_points_vis = self.object_points + self._env_pos.unsqueeze(1) # use for rendering
         indices = torch.randperm(1024)[:256]
@@ -298,15 +288,7 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         self.right_hand_finger_pc_dist = torch.sum(batch_sided_distance(self.right_hand_finger_pos, self.object_points), dim=-1)
         self.right_hand_finger_pc_dist = torch.where(self.right_hand_finger_pc_dist >= 3.0, 3.0 + 0 * self.right_hand_finger_pc_dist, self.right_hand_finger_pc_dist)
         self.right_hand_finger_pc_dist_individual = batch_sided_distance(self.right_hand_finger_pos, self.object_points)
-        # a = batch_sided_distance(self.right_hand_finger_pos, self.object_points)
-        # print('finger: \n')
-        # print(a[:4])
-        # print('palm')
-        # print(self.right_hand_pc_dist)
-        # print('base link \n')
-        # print(self.right_hand_pos)
-        # print('\n')
-        # self.hand_root_shift = self.right_hand_pos - self.right_hand_root_pos
+   
         self.hand_root_shift = self.right_hand_palm_pos - self.right_hand_root_pos
         # print(self.hand_root_shift[:4])
         
@@ -352,19 +334,9 @@ class VerticalGraspTask(VerticalGraspBasicTask):
 
         # self.point_cloud_prim.GetDisplayColorAttr().Set([Gf.Vec3f(*color) for color in isaacsim_colors])
         self.compute_full_observations()
+        
         if self.trajectory_recording:
-            
             self.compute_frame_record()
-
-        # if self.obs_type == "full_no_vel":
-        #     self.compute_full_observations(True)
-        # elif self.obs_type == "full":
-        #     self.compute_full_observations()
-        # else:
-        #     print("Unkown observations type!")
-
-        # if self.test:
-            # self.record_buf.append(self.obs_buf)
         
         observations = {'object': {"obs_buf": self.obs_buf}}
         return observations
@@ -373,42 +345,22 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         
      
         lowest = torch.min(self.object_points[:, :, -1], dim=1)[0]
-        max_finger_dist = 0.3 
-        max_hand_dist = 0.06
-        max_goal_dist = 0.05
-        hand_up_goal_dist = 1.0
+        max_finger_dist = self.training_params['max_finger_dist']
+        max_hand_dist = self.training_params['max_hand_dist']
+        max_goal_dist = self.training_params['max_goal_dist']
         
    
         
-        delta_init_qpos_value = torch.norm(self.hand_dof_pos[:,self.finger_dof_indices] - self.hand_dof_pregrasp_pos[self.finger_dof_indices], p=1, dim=-1) # pass
         right_hand_dist = self.right_hand_pc_dist
         right_hand_finger_dist = self.right_hand_finger_pc_dist
         goal_dist = torch.norm(self.goal_pos - self.object_pos, p=2, dim=-1) # zl *
-        goal_hand_dist = torch.norm(self.goal_pos - self.right_hand_palm_pos, p=2, dim=-1)
         
-        hold_value = 2
         hold_flag = (right_hand_finger_dist <= max_finger_dist).int() + (right_hand_dist <= max_hand_dist).int()
         
-            # # ---------------------- Reward After Holding ---------------------- # #
-        # Distanc from object pos to goal target pos
-        goal_rew = torch.zeros_like(goal_dist)
-        goal_rew = torch.where(hold_flag == hold_value, 1.0 * (0.9 - 2.0 * goal_dist), goal_rew)
-        # Distance from hand pos to goal target pos
-        hand_up = torch.zeros_like(goal_dist)
-        hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 0.1 * self.actions[:, 2], hand_up), hand_up)
-        hand_up = torch.where(lowest >= 0.20, torch.where(hold_flag == hold_value, 0.2 - goal_hand_dist * 0 + hand_up_goal_dist * (0.2 - goal_dist), hand_up), hand_up)
-        # Already hold the object and Already reach the goal
-        bonus = torch.zeros_like(goal_dist)
-        bonus = torch.where(hold_flag == hold_value, torch.where(goal_dist <= max_goal_dist, 1.0 / (1 + 10 * goal_dist), bonus), bonus)
             
         
         
-        init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -0.5 * goal_dist
-        # init_reward = -0.1* delta_init_qpos_value  + -1.0 * right_hand_dist + -0.5 * goal_dist + action_penalty_scale * action_penalty
 
-        grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus
-        # grasp_reward = -1.0 * right_hand_finger_dist + -2.0 * right_hand_dist + -0.5 * goal_dist + 1.0 * goal_rew + 2.0 * hand_up + 1.0 * bonus + action_penalty_scale * action_penalty
-        reward = torch.where(hold_flag != hold_value, init_reward, grasp_reward)
         self.hand_dof_pos_buf.append(self.hand_dof_pos.clone())
         self.hand_dof_velocities_buf.append(self.hand_dof_velocities.clone())
         self.action_buf.append(self.actions.clone())
@@ -450,6 +402,7 @@ class VerticalGraspTask(VerticalGraspBasicTask):
         self.obs_buf[:, 134:152] = self.hand_dof_force
         self.obs_buf[:, 152:182] = self.fingertip_vel.view(self.num_envs,-1) # finger distal link linear + angular vel
         self.obs_buf[:, 182:188] = self.object_velocities # linear + angular
+        # print(self.object_velocities)
 
         
         

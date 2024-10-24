@@ -50,20 +50,20 @@ class MovableInspireHandR(Robot):
     ) -> None:
         self._usd_path = usd_path
         self._name = name
-        if self._usd_path is None:
-            # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Robots/InspireHand/L_inspire_mimic_noflange.usd"
-            # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Luca_Data/Robots/InspireHand/L_inspire_mimic.usd"
-            # replace it to your own path
-            # self._usd_path = "/home/wenbo/Documents/repos/Luca_Data/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
-            # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
-            # self._usd_path = "/home/wenbo/Documents/repos/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
-            # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
-            # self._usd_path = "/home/wenbo/R_inspire_constrained.usd"
-            # self._usd_path = "/home/wenbo/R_inspire_1009_v3_maxforce10000_fixed.usd"
-            # self._usd_path = "/home/wenbo/R_inspire_1011_v2_filterpair_thumb_plam_proximal.usd"
-            # self._usd_path = "/home/wenbo/R_inspire_full_drive_new.usd" # full drive hand
-            # self._usd_path = "/home/wenbo/R_inspire_sh_property_10.usd"
-            self._usd_path = "/home/wenbo/R_inspire_sh_property_11.usd"
+        # if self._usd_path is None:
+        #     # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Robots/InspireHand/L_inspire_mimic_noflange.usd"
+        #     # self._usd_path = "omniverse://localhost/Projects/Luca_Data/Luca_Data/Robots/InspireHand/L_inspire_mimic.usd"
+        #     # replace it to your own path
+        #     # self._usd_path = "/home/wenbo/Documents/repos/Luca_Data/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
+        #     # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
+        #     # self._usd_path = "/home/wenbo/Documents/repos/Robots/InspireHand/R_inspire_mimic_noflange_movable_tested.usd"
+        #     # self._usd_path = "/home/wenbo/R_inspire_mimic_noflange_movable_tested.usd"
+        #     # self._usd_path = "/home/wenbo/R_inspire_constrained.usd"
+        #     # self._usd_path = "/home/wenbo/R_inspire_1009_v3_maxforce10000_fixed.usd"
+        #     # self._usd_path = "/home/wenbo/R_inspire_1011_v2_filterpair_thumb_plam_proximal.usd"
+        #     # self._usd_path = "/home/wenbo/R_inspire_full_drive_new.usd" # full drive hand
+        #     # self._usd_path = "/home/wenbo/R_inspire_sh_property_10.usd"
+        #     self._usd_path = "/home/wenbo/R_inspire_sh_property_11.usd"
 
         self._position = torch.tensor([0.0, 0.0, 0.5]) if translation is None else translation
         self._orientation = (
@@ -83,8 +83,8 @@ class MovableInspireHandR(Robot):
         
         
         
-    def set_inspire_properties(self, stage, shadow_hand_prim):
-        for link_prim in shadow_hand_prim.GetChildren():
+    def set_inspire_properties(self, stage, inspire_hand_prim):
+        for link_prim in inspire_hand_prim.GetChildren():
             if link_prim.HasAPI(PhysxSchema.PhysxRigidBodyAPI):
                 rb = PhysxSchema.PhysxRigidBodyAPI.Get(stage, link_prim.GetPrimPath())
                 rb.GetDisableGravityAttr().Set(True)

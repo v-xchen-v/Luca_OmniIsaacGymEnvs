@@ -1,0 +1,41 @@
+object: "orange"
+object_suffix: "01"
+mass: 0.1
+
+hand_usd: "R_inspire_sh_property_11.usd"
+# reward weight
+delta_init_qpos_value_weight: -0.1
+right_hand_dist_weight: -1.0
+right_hand_dist_weight_s2: 0.0
+right_hand_finger_dist_weight: -1.0
+right_hand_joint_dist_weight: 0.0
+right_hand_body_dist_weight: 0.0
+goal_hand_dist_weight: 0.0
+goal_dist_weight: -10
+goal_rew_weight: 1.0
+hand_up_weight: 2.0
+bonus_weight: 1.0
+hand_up_goal_dist_weight: 1.0
+obj_pos_change_weight: -10
+
+max_finger_dist: 0.3
+max_hand_dist: 0.05
+max_goal_dist: 0.05
+# hand_dof_default_pos: [0, 0, 0.08, 0, -1.5708, -0.7854, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] #realsense_box
+# hand_dof_default_pos: [0, 0, 0.05, 0, -1.5708, -0.7854, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] 
+hand_dof_default_pos: [0, 0, 0.03, 0, -1.5708, -0.7854, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
+# object_start_translation: [0.01, -0.08, 0.047] # realsense_box
+object_start_translation: [0.01, -0.08, 0.02]
+object_start_orientation: [1., 0, 0., 0]
+base_z_lower: -0.02
+base_action_scale: 0.02
+random_init: False
+
+reset_lower: [-0.5, -0.5, -0.01]
+# reset_lower: [-0.5, -0.5, 0.035] # realsense
+reset_upper: [0.5, 0.5, 1.0]
+
+action_scale: 0.02
+
+#others
+# copy_code_path: "/mnt/zl_dev/VerticalGrasp/code_backup"
