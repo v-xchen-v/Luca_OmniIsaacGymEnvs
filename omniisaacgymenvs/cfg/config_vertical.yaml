@@ -10,7 +10,8 @@ task_name: ${task.name}
 # experiment: 'realsense_box_'
 # experiment: 'realsense_box_1021_rotdof_mass01_pos_change_rew+'
 # experiment: 'realsense_box_1021_mass01_pos_change_rew+'
-experiment: 'bleach_cleanser_1024_lower03'
+# experiment: 'bleach_cleanser_1024_lower03'
+experiment: 'bleach_rand_pos'
 # experiment: 'orange_1022_mass01_pos_change_rew+'
 # experiment: 'orange_1019_pos_change_reward'
 code_backup_path:  "/mnt/zl_dev/VerticalGrasp/code_backup"
@@ -76,7 +77,8 @@ recording_fps: 30
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_less_stiff_s200_velx10'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/banana_1020'
-recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_cleanser_1024_lower03'
+# recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_cleanser_1024_lower03'
+recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_rand_pos'
 
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/realsense_box_1021_mass01_pos_change_rew+_test'
 # recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_1022_mass01_pos_change_rew+'

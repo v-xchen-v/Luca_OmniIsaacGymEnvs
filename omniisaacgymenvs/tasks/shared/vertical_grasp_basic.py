@@ -118,9 +118,14 @@ class VerticalGraspBasicTask(RLTask):
         self.hand_usd = self.training_params.get("hand_usd", "R_inspire_sh_property_11.usd")
         self.base_z_lower = self.training_params['base_z_lower']
         self.hand_dof_default_pos = self.training_params['hand_dof_default_pos']
-        self.random_init = self.training_params['random_init']
+        self.random_init_pos = self.training_params['random_init_pos']
+        self.random_init_rot = self.training_params['random_init_rot']
         # torch.tensor(self.training_params['reset_lower'], dtype=torch.float, device=self.device)
         self.enable_trajectory_recording = self._cfg['enable_trajectory_recording']
+        
+    
+        
+        
         self.trajectory_recording = False
         if self.test:
             if self.enable_trajectory_recording:
@@ -276,7 +281,7 @@ class VerticalGraspBasicTask(RLTask):
         self.finger_dof_indices = self.actuated_dof_indices[6:]
         self.base_trans_dof_indices = self.actuated_dof_indices[:3]
         self.base_rot_dof_indices = self.actuated_dof_indices[3:6]
-        
+        self.use_rot_dof = torch.tensor(self.training_params['use_rot_dof'], dtype=torch.float, device=self.device)
         self.prev_targets = torch.zeros((self.num_envs, self.num_hand_dofs), dtype=torch.float, device=self.device)
         self.cur_targets = torch.zeros((self.num_envs, self.num_hand_dofs), dtype=torch.float, device=self.device)
         self.prev_targets[:,:] = self.hand_dof_default_pos
@@ -516,32 +521,6 @@ class VerticalGraspBasicTask(RLTask):
         actions[env_ids] = 0
                 
        
-        # # relative control
-        # self.actions = actions.clone().to(self.device)
-        # joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
-        # hand_dof = self.hand_dof_pos
-        # target_hand_dof = hand_dof[:, joint_indices]
-        
-        # # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
-        # lower_limit = torch.tensor([-1, -1, -0.02]).cuda()
-        # upper_limit = torch.tensor([1, 1, 1]).cuda()
-
-        # target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
-        # # target_hand_dof[:,:3] += actions[:,:3] * 0.005 # 0.05 # 0.015
-        # target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # rotation set to default pose
-        # target_hand_dof[:,6:10] += actions[:,6:10]* 0.2 # 0.5 # 0.15
-        # target_hand_dof[:,10:12] += actions[:,10:12]* 0.2 # 0.5 # 0.15
-
-        # self.cur_targets[:, joint_indices] = 1.0 * target_hand_dof + 0. * self.prev_targets[:, joint_indices] # 0.2 / 0.8
-        # self.cur_targets[:,self.base_trans_dof_indices] = torch.clamp(self.cur_targets[:,self.base_trans_dof_indices], lower_limit, upper_limit) # base action clamp
-        # self.cur_targets[:,self.base_rot_dof_indices] = torch.clamp(self.cur_targets[:,self.base_rot_dof_indices], self.hand_dof_lower_limits[self.base_rot_dof_indices], self.hand_dof_upper_limits[self.base_rot_dof_indices])
-        # self.cur_targets[:,self.finger_dof_indices] = torch.clamp(self.cur_targets[:,self.finger_dof_indices], 
-        #                                                 self.hand_dof_lower_limits[self.finger_dof_indices], 
-        #                                                 self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) # 1.0 to 0.8, to avoid finger break issue
-        # self._hands.set_joint_position_targets(self.cur_targets[:, joint_indices],joint_indices = joint_indices)
-        # self.prev_targets = self.cur_targets
-        
-        
            
         # # finger absolute position control
         self.actions = actions.clone().to(self.device)
@@ -556,9 +535,13 @@ class VerticalGraspBasicTask(RLTask):
         target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
         # target_hand_dof[:,:3] += actions[:,:3] * 0.005 # 0.05 # 0.015
         # target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # fix all rot dof
-        target_hand_dof[:,3]  = self.hand_dof_default_pos[3] # fix roll
-        target_hand_dof[:,4]  = self.hand_dof_default_pos[4] # fix pitch
-        target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
+        
+        # target_hand_dof[:,3]  = self.hand_dof_default_pos[3] # fix roll
+        # target_hand_dof[:,4]  = self.hand_dof_default_pos[4] # fix pitch
+        # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
+        
+        target_hand_dof[:,3:6] = self.use_rot_dof * actions[:,3:6] * 0.1 + (1 - self.use_rot_dof) * self.hand_dof_default_pos[3:6]
+        
         # target_hand_dof[:,5] += actions[:,5] * 0.1
         # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
         target_hand_dof[:,6:] = scale(actions[:,6:],self.hand_dof_lower_limits[self.finger_dof_indices],self.hand_dof_upper_limits[self.finger_dof_indices])
@@ -592,28 +575,27 @@ class VerticalGraspBasicTask(RLTask):
 
         
         # # print(self._hands.get_measured_joint_efforts())
-        # np.array(self._hands._dof_names)[joint_indices]
         # # target_hand_dof[:,2] += self.progress_buf * -0.01
         
+        # # target_hand_dof[:,5] = self.progress_buf * -0.005
         
-        
-        # stage1_timestep = 30
-        # stage2_timestep = 100
-        # if self.progress_buf[0] <stage1_timestep:
-        #     # target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,2] = self.progress_buf * -0.005
-        #     target_hand_dof[:,10] = 1.3
-        #     # target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
-        # elif self.progress_buf[0] <stage2_timestep:
-        #     target_hand_dof[:,2] = stage1_timestep * -0.005
-        #     rand_floats_trans = torch_rand_float(-1.0, 1.0, (len(target_hand_dof), 3), device=self.device) *0.02
-        #     target_hand_dof[:,:3] += rand_floats_trans[:,:3]
-        #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,10] = 1.3
-        # else:
-        #     target_hand_dof[:,2] = stage1_timestep * -0.005 + self.progress_buf * 0.005
-        #     target_hand_dof[:,6:] = self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,10] = 1.3
+        # # stage1_timestep = 30
+        # # stage2_timestep = 100
+        # # if self.progress_buf[0] <stage1_timestep:
+        # #     # target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,2] = self.progress_buf * -0.005
+        # #     target_hand_dof[:,10] = 1.3
+        # #     # target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
+        # # elif self.progress_buf[0] <stage2_timestep:
+        # #     target_hand_dof[:,2] = stage1_timestep * -0.005
+        # #     rand_floats_trans = torch_rand_float(-1.0, 1.0, (len(target_hand_dof), 3), device=self.device) *0.02
+        # #     target_hand_dof[:,:3] += rand_floats_trans[:,:3]
+        # #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,10] = 1.3
+        # # else:
+        # #     target_hand_dof[:,2] = stage1_timestep * -0.005 + self.progress_buf * 0.005
+        # #     target_hand_dof[:,6:] = self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,10] = 1.3
         # # print(target_hand_dof[:,2])
         # # else:
         # #     target_hand_dof[:, 6:] += stage1_timestep* 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
@@ -713,6 +695,39 @@ class VerticalGraspBasicTask(RLTask):
         self.record_buf['hand_start_translation'] = self.hand_start_translation.detach().cpu()# [3]
         self.record_buf['hand_start_orientation'] = self.hand_start_orientation.detach().cpu()# [4]
     
+    def apply_random_rot_Z(self, indices):
+        
+
+        # Define the batch size
+        batch_size = len(indices)  # For example, 10 samples
+        # Original batch of quaternions in wxyz format (shape: [batch_size, 4])
+        init_orientation = self.object_start_orientation.unsqueeze(0).repeat([batch_size,1])
+
+        # Generate random rotation angles (in degrees) for each quaternion in the batch
+        theta_radians = (torch.rand(batch_size) -0.5) *2 * torch.pi  # Random angles between 0 and 360 degrees
+        # theta_radians = torch.radians(theta_degrees)  # Convert to radians
+
+        # Compute the new Z-axis rotation quaternions for each angle (in wxyz format)
+        q_newZ = torch.stack([
+            torch.cos(theta_radians / 2),  # w
+            torch.zeros(batch_size),       # x
+            torch.zeros(batch_size),       # y
+            torch.sin(theta_radians / 2)   # z
+        ], dim=1).to(self.device)   # shape: [batch_size, 4]
+
+        # Quaternion multiplication (q_newZ * q_current)
+        w1, x1, y1, z1 = q_newZ.unbind(dim=1)
+        w2, x2, y2, z2 = init_orientation.unbind(dim=1)
+
+        # Perform element-wise quaternion multiplication for each pair in the batch
+        q_result = torch.stack([
+            w1 * w2 - x1 * x2 - y1 * y2 - z1 * z2,  # w
+            w1 * x2 + x1 * w2 + y1 * z2 - z1 * y2,  # x
+            w1 * y2 - x1 * z2 + y1 * w2 + z1 * x2,  # y
+            w1 * z2 + x1 * y2 - y1 * x2 + z1 * w2   # z
+        ], dim=1)  # shape: [batch_size, 4]
+        return q_result
+    
     def reset_idx(self, env_ids):
         if self.trajectory_recording:
             if self._env.video_recorder is not None:
@@ -739,11 +754,20 @@ class VerticalGraspBasicTask(RLTask):
         rand_floats_trans = torch_rand_float(-1.0, 1.0, (len(env_ids), 3), device=self.device) *0.05
         rand_floats_trans[:,2] = 0
         
-        new_object_rot = self.object_start_orientation.unsqueeze(0).repeat([len(env_ids),1])
-        if self.random_init:
+        
+
+        
+        
+
+        if self.random_init_pos:
             new_object_pos = self.object_start_translation.unsqueeze(0).repeat([len(env_ids),1]) + rand_floats_trans+  self._env_pos[env_ids] # random init pos
         else:
             new_object_pos = self.object_start_translation.unsqueeze(0).repeat([len(env_ids),1]) + self._env_pos[env_ids] # fixed init pos
+        
+        if self.random_init_rot:
+            new_object_rot = self.apply_random_rot_Z(indices=indices)
+        else:
+            new_object_rot = self.object_start_orientation.unsqueeze(0).repeat([len(env_ids),1])
         
         object_velocities = torch.zeros_like(self.object_init_velocities, dtype=torch.float, device=self.device)
         self._objects.set_velocities(object_velocities[env_ids], indices)
