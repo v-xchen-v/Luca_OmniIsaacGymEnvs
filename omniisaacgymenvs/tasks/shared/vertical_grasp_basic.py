@@ -111,11 +111,12 @@ class VerticalGraspBasicTask(RLTask):
             assert os.path.exists(self.experiment_code_dir)
             with open(os.path.join(self.experiment_code_dir, 'cfg/training_params/params.yaml'), 'r') as file:
                 self.training_params = yaml.safe_load(file)  # Use safe_load for security reasons
-    
+        # with open('./omniisaacgymenvs/cfg/training_params/params.yaml', 'r') as file:
+        #     self.training_params = yaml.safe_load(file)  # Use safe_load for security reasons    
         self.object_name = self.training_params['object']
         self.object_suffix = self.training_params['object_suffix']
         self.hand_usd = self.training_params.get("hand_usd", "R_inspire_sh_property_11.usd")
-        
+        self.base_z_lower = self.training_params['base_z_lower']
         self.hand_dof_default_pos = self.training_params['hand_dof_default_pos']
         self.random_init = self.training_params['random_init']
         # torch.tensor(self.training_params['reset_lower'], dtype=torch.float, device=self.device)
@@ -227,7 +228,7 @@ class VerticalGraspBasicTask(RLTask):
         # self.object_usd_path = f"/home/wenbo/Obj_Asset/cube_055/cube_055_col_material.usd"
         # self.object_usd_path = f"/home/wenbo/Obj_Asset/orange/orange_material.usd"
         # self.object_usd_path = f"/home/wenbo/Car/Car_col.usd"
-        if self.object_suffix is not None:
+        if len(self.object_suffix)!=0:
             # self.object_usd_path = f"/home/wenbo/Obj_Asset/{self.object_name}/{self.object_name}_{self.object_suffix}.usd"
             self.object_usd_path = os.path.join(self.asset_path, 'Obj_Asset', self.object_name, f'{self.object_name}_{self.object_suffix}.usd')
         else:
@@ -549,7 +550,7 @@ class VerticalGraspBasicTask(RLTask):
         target_hand_dof = hand_dof[:, joint_indices]
         
         # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
-        lower_limit = torch.tensor([-1, -1, -0.02]).cuda()
+        lower_limit = torch.tensor([-1, -1, self.base_z_lower]).cuda()
         upper_limit = torch.tensor([1, 1, 1]).cuda()
 
         target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
