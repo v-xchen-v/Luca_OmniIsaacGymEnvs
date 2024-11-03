@@ -14,12 +14,12 @@ task_name: ${task.name}
 # experiment: 'orange_XYX_001'
 # experiment: 'bleach_rand_rot_new_rot_20xvel'
 # experiment: 'sunscreen_1101'
-experiment: 'sunscreen_1101'
+experiment: 'coke_can_1103'
 # experiment: 'bleach_rand_rot_new_rot_20xvel_reward+'
 # experiment: 'orange_1022_mass01_pos_change_rew+'
 # experiment: 'orange_1019_pos_change_reward'
-code_backup_path:  "/mnt/zl_dev/VerticalGrasp/code_backup"
-asset_path: /home/wenbo/Inspire_Assets/
+code_backup_path:  "/home/v-leizhou/zl_dev/VerticalGrasp/code_backup"
+asset_path: /home/v-leizhou/Inspire_Assets/
 # if set to positive integer, overrides the default number of environments
 num_envs: ''
 
@@ -38,9 +38,9 @@ pipeline: 'gpu'
 # whether to use cpu or gpu physx
 sim_device: 'gpu'
 # used for gpu simulation only - device id for running sim and task if pipeline=gpu
-device_id: 0
+device_id: 1
 # device to run RL
-rl_device: 'cuda:0'
+rl_device: 'cuda:1'
 # multi-GPU training
 multi_gpu: False
 
@@ -67,36 +67,36 @@ mt_timeout: 300
 # enable_recording: False
 enable_recording: True
 # interval between video recordings (in steps)
-# recording_interval: 1200
+recording_interval: 1200
 # recording_interval: 300
-recording_interval: 200
+# recording_interval: 200
 # length of the recorded video (in steps)
-# recording_length: 600
+recording_length: 600
 # recording_length: 300
-recording_length: 200
+# recording_length: 200
 # fps for writing recorded video
 recording_fps: 30
 # directory to save recordings in
-# recording_dir: '/mnt/zl_dev/Render_1013_step600_constrained_training'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_1023'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_no_palm_reward_new_material'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_less_stiff_s200_velx10'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/banana_1020'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_cleanser_1024_lower03'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_XYX_001'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_cleanser_1030'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_rand_rot_new_rot_20xvel_test'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/sunscreen_1101'
-recording_dir: '/mnt/zl_dev/VerticalGrasp/sunscreen_1101_test'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/bleach_rand_rot_new_rot_20xvel_reward+'
+# recording_dir: '/home/v-leizhou/zl_dev/Render_1013_step600_constrained_training'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/cube_1023'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/cube_055_no_palm_reward_new_material'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/cube_055_less_stiff_s200_velx10'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/cube_055_finger_abscontrol_s400_goalrew5_test'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/banana_1020'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/bleach_cleanser_1024_lower03'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/orange_XYX_001'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/bleach_cleanser_1030'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/bleach_rand_rot_new_rot_20xvel_test'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/sunscreen_1101'
+recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/coke_can_1103'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/bleach_rand_rot_new_rot_20xvel_reward+'
 
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/realsense_box_1021_mass01_pos_change_rew+_test'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_1022_mass01_pos_change_rew+'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/orange_1019_pos_change_reward'
-# recording_dir: '/mnt/zl_dev/VerticalGrasp/debug'
-trajectory_dir: '/mnt/zl_dev/VerticalGrasp/sunscreen_1101_test'
-enable_trajectory_recording: True
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/realsense_box_1021_mass01_pos_change_rew+_test'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/orange_1022_mass01_pos_change_rew+'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/orange_1019_pos_change_reward'
+# recording_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/debug'
+trajectory_dir: '/home/v-leizhou/zl_dev/VerticalGrasp/sunscreen_1101_test'
+enable_trajectory_recording: False
 
 wandb_activate: False
 wandb_group: ''

@@ -532,8 +532,11 @@ class VerticalGraspBasicTask(RLTask):
         target_hand_dof = hand_dof[:, joint_indices]
         
         # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
-        lower_limit = torch.tensor([-1, -1, self.base_z_lower]).to(self.device)
-        upper_limit = torch.tensor([1, 1, 1]).to(self.device)
+        # lower_limit = torch.tensor([-1, -1, self.base_z_lower]).to(self.device)
+        # upper_limit = torch.tensor([1, 1, 1]).to(self.device)
+
+        lower_limit = torch.tensor([-1, -1, -1]).to(self.device)
+        upper_limit = torch.tensor([1, 0.13, 1]).to(self.device)
 
         target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
         # target_hand_dof[:,:3] += actions[:,:3] * 0.005 # 0.05 # 0.015
@@ -562,7 +565,7 @@ class VerticalGraspBasicTask(RLTask):
         
     
         
-        # # # for rule-base grasping
+        # # # # for rule-base grasping
         
         # self.actions = actions.clone().to(self.device)
         # joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
@@ -572,14 +575,14 @@ class VerticalGraspBasicTask(RLTask):
         # hand_dof[:,:] = self.hand_dof_default_pos
         # target_hand_dof = hand_dof[:, joint_indices]
 
-        # # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
-        # lower_limit = torch.tensor([-1, -1, -0.02]).to(self.device)
-        # upper_limit = torch.tensor([1, 1, 1]).to(self.device)
+        # # lower_limit = torch.tensor([-1, -1, -0.02]).to(self.device)
+        # # upper_limit = torch.tensor([1, 1, 1]).to(self.device)
 
-
+        # lower_limit = torch.tensor([-1, -1, -1]).to(self.device)
+        # upper_limit = torch.tensor([1, 0.13, 1]).to(self.device)
         
         # # print(self._hands.get_measured_joint_efforts())
-        # target_hand_dof[:,5] += self.progress_buf * -0.01
+        # target_hand_dof[:,2] += self.progress_buf * -0.01
         
         # # target_hand_dof[:,5] = self.progress_buf * -0.005
         
@@ -900,8 +903,10 @@ def compute_supgrasp_reward(
     goal_rew = torch.where(hold_flag == hold_value, 1.0 * (0.9 - 2.0 * goal_dist), goal_rew)
     # Distance from hand pos to goal target pos
     hand_up = torch.zeros_like(goal_dist)
+
+    hand_up_dof = -actions[:, 1]
     # hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 0.1 * actions[:, 2], hand_up), hand_up)
-    hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 1.0 * actions[:, 2], hand_up), hand_up)
+    hand_up = torch.where(lowest >= 0.01, torch.where(hold_flag == hold_value, 0.1 + 1.0 * hand_up_dof, hand_up), hand_up)
     hand_up = torch.where(lowest >= 0.20, torch.where(hold_flag == hold_value, 0.2 - goal_hand_dist * 0 + hand_up_goal_dist_weight * (0.2 - goal_dist), hand_up), hand_up)
     # Already hold the object and Already reach the goal
     bonus = torch.zeros_like(goal_dist)

@@ -1,8 +1,8 @@
-object: "bowl"
+object: "coke_can_new"
 object_suffix: '' 
 mass: 0.1
 
-hand_usd: "R_inspire_sh_property_14.usd"
+hand_usd: "R_inspire_sh_property_12.usd"
 # hand_usd: "01.usd"
 # reward weight
 delta_init_qpos_value_weight: -0.1
@@ -29,16 +29,21 @@ max_goal_dist: 0.05
 # hand_dof_default_pos: [0, 0, 0.03, 0, -1.5708, -0.7854, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
 # hand_dof_default_pos: [0, 0, 0.02, 0.7854, -1.5708, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # XYX init orange
 # hand_dof_default_pos: [0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # hand 14 new rot
-hand_dof_default_pos: [0, 0, 0.08, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # box_coconut
+# hand_dof_default_pos: [0, 0, 0.08, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # box_coconut
+# hand_dof_default_pos: [0.1, -0.15, 0.0, 0, -1.5708, -1.5708, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # coke_can
+hand_dof_default_pos: [0.10, 0.12, 0.07, 0, -1.5708, -1.5708, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # coke_can
+# hand_dof_default_pos: [0., -0., 0., 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # coke_can
 # hand_dof_default_pos: [0, 0, 0.08, 0.7854, -1.5708, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # XYX init realsense box
 # hand_dof_default_pos: [0, 0, 0.03, -0.7854, -1.4, -1.5708, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
 # hand_dof_default_pos: [0, 0, 0.03, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
 # object_start_translation: [0.01, -0.08, 0.047] # realsense_box
-object_start_translation: [0.01, -0.08, 0.02] 
+# object_start_translation: [0.01, -0.08, 0.02] 
+object_start_translation: [0.1, -0.08, 0.075] # coke_can
+# object_start_translation: [0.1, -0.08, 0.1] # bleach_cleanser_nerf_horizontal
 # object_start_orientation: [1., 0, 0., 0] # orange, realsense_box
 # object_start_orientation: [0.5, -0.5, 0.5, -0.5] #bleach subscreen hammer
-# object_start_orientation: [0.707, 0.707, 0., 0.] #bleach nerf
-object_start_orientation: [0.707, 0.707, 0., 0.] #bowl
+object_start_orientation: [0.707, 0.707, 0., 0.] #bleach nerf, coke_can +  horizontal
+# object_start_orientation: [0.707, 0.707, 0., 0.] #bowl
 # object_start_orientation: [0.707, 0., 0., 0.707] #bleach nerf
 base_z_lower: -0.02
 base_action_scale: 0.02
@@ -50,8 +55,8 @@ use_rot_dof: [0, 0, 0]
 # fix_pitch: True
 # fix_yaw: False
 
-reset_lower: [-0.5, -0.5, -0.01]
-# reset_lower: [-0.5, -0.5, 0.035] # realsense
+# reset_lower: [-0.5, -0.5, -0.01]
+reset_lower: [-0.5, -0.5, 0.035] # realsense
 reset_upper: [0.5, 0.5, 1.0]
 
 action_scale: 0.02
