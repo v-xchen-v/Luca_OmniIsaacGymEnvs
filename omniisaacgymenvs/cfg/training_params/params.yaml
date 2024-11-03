@@ -1,4 +1,4 @@
-object: "bleach_cleanser_nerf"
+object: "bowl"
 object_suffix: '' 
 mass: 0.1
 
@@ -12,9 +12,11 @@ right_hand_finger_dist_weight: -1.0
 right_hand_joint_dist_weight: 0.0
 right_hand_body_dist_weight: 0.0
 goal_hand_dist_weight: 0.0
-goal_dist_weight: -10
+# goal_dist_weight: -10
+goal_dist_weight: -20
 goal_rew_weight: 1.0
-hand_up_weight: 2.0
+# hand_up_weight: 2.0
+hand_up_weight: 5.0
 bonus_weight: 1.0
 hand_up_goal_dist_weight: 1.0
 obj_pos_change_weight: -10
@@ -26,21 +28,24 @@ max_goal_dist: 0.05
 # hand_dof_default_pos: [0, 0, 0.05, 0, -1.5708, -0.7854, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] 
 # hand_dof_default_pos: [0, 0, 0.03, 0, -1.5708, -0.7854, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
 # hand_dof_default_pos: [0, 0, 0.02, 0.7854, -1.5708, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # XYX init orange
-hand_dof_default_pos: [0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # hand 14 new rot
+# hand_dof_default_pos: [0, 0, 0.02, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # hand 14 new rot
+hand_dof_default_pos: [0, 0, 0.08, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # box_coconut
 # hand_dof_default_pos: [0, 0, 0.08, 0.7854, -1.5708, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # XYX init realsense box
 # hand_dof_default_pos: [0, 0, 0.03, -0.7854, -1.4, -1.5708, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
 # hand_dof_default_pos: [0, 0, 0.03, 0, 0, 0, 0, 0, 0, 0, 1.3, 0, 0, 0, 0, -0.1, 0, 0] # orange
 # object_start_translation: [0.01, -0.08, 0.047] # realsense_box
-object_start_translation: [0.01, -0.08, 0.02]
+object_start_translation: [0.01, -0.08, 0.02] 
 # object_start_orientation: [1., 0, 0., 0] # orange, realsense_box
-# object_start_orientation: [0.5, -0.5, 0.5, 0.5] #bleach
-object_start_orientation: [0.707, 0.707, 0., 0.] #bleach nerf
+# object_start_orientation: [0.5, -0.5, 0.5, -0.5] #bleach subscreen hammer
+# object_start_orientation: [0.707, 0.707, 0., 0.] #bleach nerf
+object_start_orientation: [0.707, 0.707, 0., 0.] #bowl
+# object_start_orientation: [0.707, 0., 0., 0.707] #bleach nerf
 base_z_lower: -0.02
 base_action_scale: 0.02
 random_init_pos: False
 random_init_rot: False
 
-use_rot_dof: [0, 0, 1]
+use_rot_dof: [0, 0, 0]
 # fix_roll: False
 # fix_pitch: True
 # fix_yaw: False

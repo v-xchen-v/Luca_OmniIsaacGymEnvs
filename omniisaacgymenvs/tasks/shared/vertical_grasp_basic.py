@@ -113,8 +113,8 @@ class VerticalGraspBasicTask(RLTask):
                 self.training_params = yaml.safe_load(file)  # Use safe_load for security reasons
         # with open('./omniisaacgymenvs/cfg/training_params/params.yaml', 'r') as file:
         #     self.training_params = yaml.safe_load(file)  # Use safe_load for security reasons    
-        # self.object_name = self.training_params['object']
-        self.object_name = 'bleach_cleanser_nerf'
+        self.object_name = self.training_params['object']
+        # self.object_name = 'bleach_cleanser_nerf'
         self.object_suffix = self.training_params['object_suffix']
         self.hand_usd = self.training_params.get("hand_usd", "R_inspire_sh_property_11.usd")
         self.base_z_lower = self.training_params['base_z_lower']
@@ -359,7 +359,7 @@ class VerticalGraspBasicTask(RLTask):
         self._hands._physics_view.set_dof_max_forces(max_forces,indices = indices.detach().cpu())
         # self._hands._physics_view.set_dof_limits(dof_limits,indices = indices.detach().cpu())
         max_vel = self._hands._physics_view.get_dof_max_velocities()
-        # max_vel[:,11:15] /=100
+        max_vel[:,5] *=20
         # max_vel[:,16:] = 0
         
         # max_vel[:,6:] /= 100
@@ -525,102 +525,102 @@ class VerticalGraspBasicTask(RLTask):
                 
        
            
-        # # # finger absolute position control
-        # self.actions = actions.clone().to(self.device)
-        # joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
-        # hand_dof = self.hand_dof_pos
-        # target_hand_dof = hand_dof[:, joint_indices]
-        
-        # # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
-        # lower_limit = torch.tensor([-1, -1, self.base_z_lower]).cuda()
-        # upper_limit = torch.tensor([1, 1, 1]).cuda()
-
-        # target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
-        # # target_hand_dof[:,:3] += actions[:,:3] * 0.005 # 0.05 # 0.015
-        # # target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # fix all rot dof
-        
-        # # target_hand_dof[:,3]  = self.hand_dof_default_pos[3] # fix roll
-        # # target_hand_dof[:,4]  = self.hand_dof_default_pos[4] # fix pitch
-        # # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
-        # target_hand_dof[:, 3:6] = (1 - self.use_rot_dof) * self.hand_dof_default_pos[3:6]
-        # target_hand_dof[:,3:6] += self.use_rot_dof * (actions[:,3:6] * 0.1 + hand_dof[:,3:6])
-        # # target_hand_dof[:,3:6] += self.use_rot_dof * actions[:,3:6] * 0.1 + (1 - self.use_rot_dof) * self.hand_dof_default_pos[3:6]
-        
-        # # target_hand_dof[:,5] += actions[:,5] * 0.1
-        # # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
-        # target_hand_dof[:,6:] = scale(actions[:,6:],self.hand_dof_lower_limits[self.finger_dof_indices],self.hand_dof_upper_limits[self.finger_dof_indices])
-        # target_hand_dof[:,10] = self.hand_dof_upper_limits[10] # thumb yaw fix
-
-        # self.cur_targets[:, joint_indices] = 1.0 * target_hand_dof + 0. * self.prev_targets[:, joint_indices] # 0.2 / 0.8
-        # self.cur_targets[:,self.base_trans_dof_indices] = torch.clamp(self.cur_targets[:,self.base_trans_dof_indices], lower_limit, upper_limit) # base action clamp
-        # self.cur_targets[:,self.base_rot_dof_indices] = torch.clamp(self.cur_targets[:,self.base_rot_dof_indices], self.hand_dof_lower_limits[self.base_rot_dof_indices], self.hand_dof_upper_limits[self.base_rot_dof_indices])
-        # self.cur_targets[:,self.finger_dof_indices] = torch.clamp(self.cur_targets[:,self.finger_dof_indices], 
-        #                                                 self.hand_dof_lower_limits[self.finger_dof_indices], 
-        #                                                 self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) # 1.0 to 0.8, to avoid finger break issue
-        # self._hands.set_joint_position_targets(self.cur_targets[:, joint_indices],joint_indices = joint_indices)
-        # self.prev_targets = self.cur_targets
-        
-    
-        
-        # # for rule-base grasping
-        
+        # # finger absolute position control
         self.actions = actions.clone().to(self.device)
         joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
-        hand_dof = self.hand_dof_pos.clone()
-        # print(hand_dof[:,10])
-    
-        hand_dof[:,:] = self.hand_dof_default_pos
+        hand_dof = self.hand_dof_pos
         target_hand_dof = hand_dof[:, joint_indices]
-
+        
         # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
-        lower_limit = torch.tensor([-1, -1, -0.02]).cuda()
-        upper_limit = torch.tensor([1, 1, 1]).cuda()
+        lower_limit = torch.tensor([-1, -1, self.base_z_lower]).to(self.device)
+        upper_limit = torch.tensor([1, 1, 1]).to(self.device)
+
+        target_hand_dof[:,:3] += actions[:,:3] * 0.02 # 0.05 # 0.015
+        # target_hand_dof[:,:3] += actions[:,:3] * 0.005 # 0.05 # 0.015
+        # target_hand_dof[:,3:6]  = self.hand_dof_default_pos[3:6] # fix all rot dof
+        
+        # target_hand_dof[:,3]  = self.hand_dof_default_pos[3] # fix roll
+        # target_hand_dof[:,4]  = self.hand_dof_default_pos[4] # fix pitch
+        # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
+        target_hand_dof[:, 3:6] = (1 - self.use_rot_dof) * self.hand_dof_default_pos[3:6]
+        target_hand_dof[:,3:6] += self.use_rot_dof * (actions[:,3:6] * 0.1 + hand_dof[:,3:6])
+        # target_hand_dof[:,3:6] += self.use_rot_dof * actions[:,3:6] * 0.1 + (1 - self.use_rot_dof) * self.hand_dof_default_pos[3:6]
+        
+        # target_hand_dof[:,5] += actions[:,5] * 0.1
+        # target_hand_dof[:,5]  = self.hand_dof_default_pos[5] # fix yaw
+        target_hand_dof[:,6:] = scale(actions[:,6:],self.hand_dof_lower_limits[self.finger_dof_indices],self.hand_dof_upper_limits[self.finger_dof_indices])
+        target_hand_dof[:,10] = self.hand_dof_upper_limits[10] # thumb yaw fix
+
+        self.cur_targets[:, joint_indices] = 1.0 * target_hand_dof + 0. * self.prev_targets[:, joint_indices] # 0.2 / 0.8
+        self.cur_targets[:,self.base_trans_dof_indices] = torch.clamp(self.cur_targets[:,self.base_trans_dof_indices], lower_limit, upper_limit) # base action clamp
+        self.cur_targets[:,self.base_rot_dof_indices] = torch.clamp(self.cur_targets[:,self.base_rot_dof_indices], self.hand_dof_lower_limits[self.base_rot_dof_indices], self.hand_dof_upper_limits[self.base_rot_dof_indices])
+        self.cur_targets[:,self.finger_dof_indices] = torch.clamp(self.cur_targets[:,self.finger_dof_indices], 
+                                                        self.hand_dof_lower_limits[self.finger_dof_indices], 
+                                                        self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) # 1.0 to 0.8, to avoid finger break issue
+        self._hands.set_joint_position_targets(self.cur_targets[:, joint_indices],joint_indices = joint_indices)
+        self.prev_targets = self.cur_targets
+        
+    
+        
+        # # # for rule-base grasping
+        
+        # self.actions = actions.clone().to(self.device)
+        # joint_indices = torch.tensor(self.base_trans_dof_indices + self.base_rot_dof_indices + self.finger_dof_indices)
+        # hand_dof = self.hand_dof_pos.clone()
+        # # print(hand_dof[:,10])
+    
+        # hand_dof[:,:] = self.hand_dof_default_pos
+        # target_hand_dof = hand_dof[:, joint_indices]
+
+        # # lower_limit = torch.tensor([-1, -1, -0.05]).cuda()
+        # lower_limit = torch.tensor([-1, -1, -0.02]).to(self.device)
+        # upper_limit = torch.tensor([1, 1, 1]).to(self.device)
 
 
         
-        # print(self._hands.get_measured_joint_efforts())
-        target_hand_dof[:,5] += self.progress_buf * -0.01
+        # # print(self._hands.get_measured_joint_efforts())
+        # target_hand_dof[:,5] += self.progress_buf * -0.01
         
-        # target_hand_dof[:,5] = self.progress_buf * -0.005
+        # # target_hand_dof[:,5] = self.progress_buf * -0.005
         
-        # stage1_timestep = 30
-        # stage2_timestep = 100
-        # if self.progress_buf[0] <stage1_timestep:
-        #     # target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,2] = self.progress_buf * -0.005
-        #     target_hand_dof[:,10] = 1.3
-        #     # target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
-        # elif self.progress_buf[0] <stage2_timestep:
-        #     target_hand_dof[:,2] = stage1_timestep * -0.005
-        #     rand_floats_trans = torch_rand_float(-1.0, 1.0, (len(target_hand_dof), 3), device=self.device) *0.02
-        #     target_hand_dof[:,:3] += rand_floats_trans[:,:3]
-        #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,10] = 1.3
-        # else:
-        #     target_hand_dof[:,2] = stage1_timestep * -0.005 + self.progress_buf * 0.005
-        #     target_hand_dof[:,6:] = self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,10] = 1.3
-        # print(target_hand_dof[:,2])
-        # else:
-        #     target_hand_dof[:, 6:] += stage1_timestep* 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,2] += (self.progress_buf -stage1_timestep) * -0.01
+        # # stage1_timestep = 30
+        # # stage2_timestep = 100
+        # # if self.progress_buf[0] <stage1_timestep:
+        # #     # target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,2] = self.progress_buf * -0.005
+        # #     target_hand_dof[:,10] = 1.3
+        # #     # target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
+        # # elif self.progress_buf[0] <stage2_timestep:
+        # #     target_hand_dof[:,2] = stage1_timestep * -0.005
+        # #     rand_floats_trans = torch_rand_float(-1.0, 1.0, (len(target_hand_dof), 3), device=self.device) *0.02
+        # #     target_hand_dof[:,:3] += rand_floats_trans[:,:3]
+        # #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,10] = 1.3
+        # # else:
+        # #     target_hand_dof[:,2] = stage1_timestep * -0.005 + self.progress_buf * 0.005
+        # #     target_hand_dof[:,6:] = self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,10] = 1.3
+        # # print(target_hand_dof[:,2])
+        # # else:
+        # #     target_hand_dof[:, 6:] += stage1_timestep* 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,2] += (self.progress_buf -stage1_timestep) * -0.01
         
-        # stage1_timestep = 300
-        # if self.progress_buf[0] <stage1_timestep:
-        #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     # target_hand_dof[:,-2] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[10]
-        #     target_hand_dof[:,10] = 1.3
-        #     # target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
+        # # stage1_timestep = 300
+        # # if self.progress_buf[0] <stage1_timestep:
+        # #     target_hand_dof[:, 6:] = (self.progress_buf).unsqueeze(-1) * 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     # target_hand_dof[:,-2] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[10]
+        # #     target_hand_dof[:,10] = 1.3
+        # #     # target_hand_dof[:,-1] = (self.progress_buf).unsqueeze(-1) * 0.1 *self.hand_dof_upper_limits[15]
             
   
-        # else:
-        #     target_hand_dof[:, 6:] += stage1_timestep* 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
-        #     target_hand_dof[:,2] += (self.progress_buf -stage1_timestep) * -0.01
-        target_hand_dof[:,:3] = torch.clamp(target_hand_dof[:,:3], lower_limit, upper_limit) # base action clamp
-        target_hand_dof[:,6:] = torch.clamp(target_hand_dof[:,6:], 
-                                            self.hand_dof_lower_limits[self.finger_dof_indices], 
-                                            self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) 
-        self._hands.set_joint_position_targets(target_hand_dof,joint_indices = joint_indices) # direct position control, wo smoothing
+        # # else:
+        # #     target_hand_dof[:, 6:] += stage1_timestep* 0.02 *self.hand_dof_upper_limits[self.finger_dof_indices]
+        # #     target_hand_dof[:,2] += (self.progress_buf -stage1_timestep) * -0.01
+        # target_hand_dof[:,:3] = torch.clamp(target_hand_dof[:,:3], lower_limit, upper_limit) # base action clamp
+        # target_hand_dof[:,6:] = torch.clamp(target_hand_dof[:,6:], 
+        #                                     self.hand_dof_lower_limits[self.finger_dof_indices], 
+        #                                     self.hand_dof_upper_limits[self.finger_dof_indices] * 1.0) 
+        # self._hands.set_joint_position_targets(target_hand_dof,joint_indices = joint_indices) # direct position control, wo smoothing
 
             
 
